@@ -28,7 +28,6 @@
 | ML / матчинг | Python, NumPy, scikit-learn, Faiss |
 | Интеграции | Spotify API, Last.fm API, SoundCloud API, Яндекс Музыка |
 | Дизайн | Figma |
-| DevOps | Docker, GitHub Actions |
 
 ---
 
