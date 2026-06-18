@@ -7,7 +7,7 @@ Django + DRF + PostgreSQL.
 | Инструмент | Версия |
 |------------|--------|
 | Python | **3.12.x** |
-| PostgreSQL | **18.x** (или одна мажорная версия на выбор — главное, чтобы совпадала) |
+| PostgreSQL | **18.x** (одинаковая у обоих) |
 | Django | 5.x (из `requirements.txt`) |
 
 Проверка: `python --version` и `psql --version`.
@@ -18,9 +18,9 @@ Docker в разработке **не используем** — только Py
 
 ### 1. PostgreSQL
 
-Установите [PostgreSQL](https://www.postgresql.org/download/windows/) (договоритесь с коллегой: например, 18 у обоих).
+Установите [PostgreSQL](https://www.postgresql.org/download/windows/).
 
-Создайте пользователя и БД (pgAdmin или `psql` от суперпользователя `postgres`):
+Создайте пользователя и БД (pgAdmin или `psql`):
 
 ```sql
 CREATE USER soundmate WITH PASSWORD 'soundmate';
@@ -42,8 +42,6 @@ pip install -r requirements.txt
 ```powershell
 copy .env.example .env
 ```
-
-Отредактируйте `.env`, если у вас другой пароль PostgreSQL.
 
 ### 4. Запуск
 
@@ -73,4 +71,4 @@ python manage.py runserver
 
 ## Docker
 
-Файлы `Dockerfile` и корневой `docker-compose.yml` — для отчётности по стеку. В работе не нужны.
+`Dockerfile` и корневой `docker-compose.yml` — для отчётности по стеку. В работе не нужны.

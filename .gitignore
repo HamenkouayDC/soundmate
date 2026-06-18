@@ -1,39 +1,92 @@
-# Python
+# ========================
+# Python / Backend / ML
+# ========================
 __pycache__/
 *.py[cod]
-*$py.class
+*.pyo
+*.pyd
 *.so
-.Python
-env/
-venv/
-.venv/
+*.egg
 *.egg-info/
 dist/
 build/
+.eggs/
+.venv/
+venv/
+env/
+.env
+.env.local
+.env.*.local
 
 # Django
-*.log
 local_settings.py
-db.sqlite3
 media/
 staticfiles/
 
-# Environment
-.env
-.env.local
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
 
-# IDE
-.idea/
+# ========================
+# Node / Frontend
+# ========================
+node_modules/
+.npm
+.next/
+.nuxt/
+*.tsbuildinfo
+
+# ========================
+# Docker
+# ========================
+.docker/
+pgdata/
+
+# ========================
+# IDE и редакторы
+# ========================
 .vscode/
+.idea/
 *.swp
 *.swo
-
-# OS
 .DS_Store
 Thumbs.db
 
-# Docker
-pgdata/
+# ========================
+# Секреты и ключи
+# ========================
+*.pem
+*.key
+*.cert
+secrets/
+config/local.py
+.env*
+!.env.example
 
-# Node (frontend, future)
-node_modules/
+# ========================
+# Логи и базы данных
+# ========================
+*.log
+*.sqlite
+*.sqlite3
+*.db
+
+# ========================
+# ML артефакты
+# ========================
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+models/
+data/raw/
+data/processed/
+
+# ========================
+# Тесты и покрытие
+# ========================
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
