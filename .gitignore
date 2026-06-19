@@ -48,6 +48,7 @@ pgdata/
 .vscode/
 .idea/
 .cursor/mcp.json
+ПАМЯТКА_BACKEND.txt
 *.swp
 *.swo
 .DS_Store
