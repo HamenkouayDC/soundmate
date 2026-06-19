@@ -53,11 +53,15 @@ python manage.py runserver
 
 ## Эндпоинты
 
-| URL | Описание |
-|-----|----------|
-| http://localhost:8000/api/v1/health/ | Healthcheck |
-| http://localhost:8000/api/docs/ | Swagger UI |
-| http://localhost:8000/admin/ | Django Admin |
+| URL | Метод | Описание |
+|-----|-------|----------|
+| http://localhost:8000/api/v1/health/ | GET | Healthcheck |
+| http://localhost:8000/api/v1/auth/register/ | POST | Регистрация |
+| http://localhost:8000/api/v1/auth/login/ | POST | Вход (JWT) |
+| http://localhost:8000/api/v1/auth/refresh/ | POST | Обновить access-токен |
+| http://localhost:8000/api/v1/users/me/ | GET | Текущий пользователь |
+| http://localhost:8000/api/docs/ | GET | Swagger UI |
+| http://localhost:8000/admin/ | GET | Django Admin |
 
 ## Структура apps
 
