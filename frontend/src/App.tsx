@@ -1,4 +1,4 @@
-import { Link, Navigate, Route, Routes } from 'react-router'
+import { Navigate, Route, Routes } from 'react-router'
 
 import { ProtectedRoute } from './components/layout/ProtectedRoute'
 import { FeedPage } from './pages/FeedPage'
@@ -33,28 +33,6 @@ function App() {
           }
         />
       </Routes>
-
-      <div className="fixed bottom-4 left-4 rounded-xl bg-white px-4 py-3 text-sm shadow">
-        <p className="mb-2 font-semibold">Навигация для проверки:</p>
-
-        <div className="flex gap-3">
-          <Link className="text-blue-600" to="/register">
-            Register
-          </Link>
-
-          <Link className="text-blue-600" to="/login">
-            Login
-          </Link>
-
-          <Link className="text-blue-600" to="/profile">
-            Profile
-          </Link>
-
-          <Link className="text-blue-600" to="/feed">
-            Feed
-          </Link>
-        </div>
-      </div>
     </div>
   )
 }
