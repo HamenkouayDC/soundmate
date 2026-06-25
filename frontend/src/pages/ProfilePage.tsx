@@ -1,8 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 
+import { refreshAccessToken } from '../shared/api/authApi'
+import { ApiError } from '../shared/api/apiClient'
 import { getCurrentUser, type CurrentUser } from '../shared/api/userApi'
-import { clearTokens, getAccessToken } from '../shared/api/tokenStorage'
+import {
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  saveAccessToken,
+  saveTokens,
+} from '../shared/api/tokenStorage'
 
 export function ProfilePage() {
   const navigate = useNavigate()
@@ -13,28 +21,55 @@ export function ProfilePage() {
 
   useEffect(() => {
     async function loadUser() {
-      const token = getAccessToken()
+      const accessToken = getAccessToken()
 
-      if (!token) {
+      if (!accessToken) {
         navigate('/login')
         return
       }
 
       try {
-        const currentUser = await getCurrentUser(token)
+        const currentUser = await getCurrentUser(accessToken)
         setUser(currentUser)
       } catch (err) {
-        clearTokens()
+        if (err instanceof ApiError && err.status === 401) {
+          const refreshToken = getRefreshToken()
 
-        if (err instanceof Error) {
-          setError(err.message)
+          if (!refreshToken) {
+            clearTokens()
+            navigate('/login')
+            return
+          }
+
+          try {
+            const refreshedTokens = await refreshAccessToken(refreshToken)
+
+            if (refreshedTokens.refresh) {
+              saveTokens(refreshedTokens.access, refreshedTokens.refresh)
+            } else {
+              saveAccessToken(refreshedTokens.access)
+            }
+
+            const currentUser = await getCurrentUser(refreshedTokens.access)
+            setUser(currentUser)
+          } catch {
+            clearTokens()
+            navigate('/login')
+            return
+          }
         } else {
-          setError('Не удалось загрузить профиль')
-        }
+          clearTokens()
 
-        setTimeout(() => {
-          navigate('/login')
-        }, 1000)
+          if (err instanceof Error) {
+            setError(err.message)
+          } else {
+            setError('Не удалось загрузить профиль')
+          }
+
+          setTimeout(() => {
+            navigate('/login')
+          }, 1000)
+        }
       } finally {
         setIsLoading(false)
       }

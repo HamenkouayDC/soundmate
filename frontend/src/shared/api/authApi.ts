@@ -16,6 +16,11 @@ export type AuthTokens = {
   refresh: string
 }
 
+export type RefreshTokenResponse = {
+  access: string
+  refresh?: string
+}
+
 export function registerUser(data: RegisterData) {
   return apiClient('/auth/register/', {
     method: 'POST',
@@ -27,5 +32,14 @@ export function loginUser(data: LoginData) {
   return apiClient<AuthTokens>('/auth/login/', {
     method: 'POST',
     body: data,
+  })
+}
+
+export function refreshAccessToken(refresh: string) {
+  return apiClient<RefreshTokenResponse>('/auth/refresh/', {
+    method: 'POST',
+    body: {
+      refresh,
+    },
   })
 }

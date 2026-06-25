@@ -6,6 +6,10 @@ export function saveTokens(access: string, refresh: string) {
   localStorage.setItem(REFRESH_TOKEN_KEY, refresh)
 }
 
+export function saveAccessToken(access: string) {
+  localStorage.setItem(ACCESS_TOKEN_KEY, access)
+}
+
 export function getAccessToken() {
   return localStorage.getItem(ACCESS_TOKEN_KEY)
 }

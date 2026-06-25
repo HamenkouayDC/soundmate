@@ -6,6 +6,16 @@ type RequestOptions = {
   token?: string | null
 }
 
+export class ApiError extends Error {
+  status: number
+
+  constructor(message: string, status: number) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+  }
+}
+
 export async function apiClient<T>(
   endpoint: string,
   options: RequestOptions = {},
@@ -24,11 +34,16 @@ export async function apiClient<T>(
   if (!response.ok) {
     const errorData = await response.json().catch(() => null)
 
-    throw new Error(
+    throw new ApiError(
       errorData?.detail ||
         errorData?.message ||
         'Произошла ошибка при запросе к серверу',
+      response.status,
     )
+  }
+
+  if (response.status === 204) {
+    return null as T
   }
 
   return response.json()
