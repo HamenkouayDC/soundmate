@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { AppHeader } from '../components/layout/AppHeader'
+import { Button } from '../components/ui/Button'
+import { Input } from '../components/ui/Input'
+import { Tag } from '../components/ui/Tag'
 import { ApiError } from '../shared/api/apiClient'
 import { refreshAccessToken } from '../shared/api/authApi'
 import { getCurrentUser, type CurrentUser } from '../shared/api/userApi'
@@ -15,12 +18,26 @@ import {
 const mockGenres = ['Indie', 'Rock', 'Hip-Hop', 'Pop']
 const mockArtists = ['Arctic Monkeys', 'Nirvana', 'The Weeknd']
 
+type ProfileForm = {
+  displayName: string
+  city: string
+  birthDate: string
+  bio: string
+}
+
 export function ProfilePage() {
   const navigate = useNavigate()
 
   const [user, setUser] = useState<CurrentUser | null>(null)
+  const [profileForm, setProfileForm] = useState<ProfileForm | null>(null)
+  const [savedProfileForm, setSavedProfileForm] = useState<ProfileForm | null>(
+    null,
+  )
+
   const [isLoading, setIsLoading] = useState(true)
+  const [isEditing, setIsEditing] = useState(false)
   const [error, setError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
 
   useEffect(() => {
     async function loadProfile() {
@@ -33,7 +50,19 @@ export function ProfilePage() {
 
       try {
         const currentUser = await getCurrentUser(accessToken)
+
+        const initialForm: ProfileForm = {
+          displayName: currentUser.profile.display_name || 'Пользователь',
+          city: 'Будет добавлено позже',
+          birthDate: currentUser.profile.birth_date || 'Не указана',
+          bio:
+            currentUser.profile.bio ||
+            'Расскажи немного о себе, любимой музыке и концертах, на которые хочешь сходить.',
+        }
+
         setUser(currentUser)
+        setProfileForm(initialForm)
+        setSavedProfileForm(initialForm)
       } catch (err) {
         if (err instanceof ApiError && err.status === 401) {
           const refreshToken = getRefreshToken()
@@ -50,7 +79,19 @@ export function ProfilePage() {
             saveAccessToken(newTokens.access)
 
             const currentUser = await getCurrentUser(newTokens.access)
+
+            const initialForm: ProfileForm = {
+              displayName: currentUser.profile.display_name || 'Пользователь',
+              city: 'Будет добавлено позже',
+              birthDate: currentUser.profile.birth_date || 'Не указана',
+              bio:
+                currentUser.profile.bio ||
+                'Расскажи немного о себе, любимой музыке и концертах, на которые хочешь сходить.',
+            }
+
             setUser(currentUser)
+            setProfileForm(initialForm)
+            setSavedProfileForm(initialForm)
           } catch {
             clearTokens()
             navigate('/login')
@@ -72,6 +113,49 @@ export function ProfilePage() {
     loadProfile()
   }, [navigate])
 
+  function handleChange(field: keyof ProfileForm, value: string) {
+    setSuccessMessage('')
+
+    setProfileForm((currentForm) => {
+      if (!currentForm) {
+        return currentForm
+      }
+
+      return {
+        ...currentForm,
+        [field]: value,
+      }
+    })
+  }
+
+  function handleStartEditing() {
+    setSuccessMessage('')
+    setIsEditing(true)
+  }
+
+  function handleCancelEditing() {
+    setProfileForm(savedProfileForm)
+    setSuccessMessage('')
+    setIsEditing(false)
+  }
+
+  function handleSaveProfile() {
+    if (!profileForm) {
+      return
+    }
+
+    if (!profileForm.displayName.trim()) {
+      setSuccessMessage('')
+      setError('Имя не может быть пустым')
+      return
+    }
+
+    setError('')
+    setSavedProfileForm(profileForm)
+    setIsEditing(false)
+    setSuccessMessage('Изменения сохранены локально. Backend пока не обновляется.')
+  }
+
   if (isLoading) {
     return (
       <main className="min-h-screen bg-[#f8f0ff]">
@@ -86,7 +170,7 @@ export function ProfilePage() {
     )
   }
 
-  if (error) {
+  if (error && !profileForm) {
     return (
       <main className="min-h-screen bg-[#f8f0ff]">
         <AppHeader activePage="profile" />
@@ -100,17 +184,11 @@ export function ProfilePage() {
     )
   }
 
-  if (!user) {
+  if (!user || !profileForm) {
     return null
   }
 
-  const displayName = user.profile.display_name || 'Пользователь'
-  const avatarLetter = displayName[0]?.toUpperCase() || 'S'
-  const birthDate = user.profile.birth_date || 'Не указана'
-
-  const bio =
-    user.profile.bio ||
-    'Расскажи немного о себе, любимой музыке и концертах, на которые хочешь сходить.'
+  const avatarLetter = profileForm.displayName[0]?.toUpperCase() || 'S'
 
   return (
     <main className="min-h-screen bg-[#f8f0ff]">
@@ -142,9 +220,21 @@ export function ProfilePage() {
 
             <p className="mt-4 max-w-2xl text-base leading-7 text-gray-600">
               Здесь собрана основная информация о тебе и музыкальные интересы.
-              Позже эти данные можно будет редактировать через backend.
+              Сейчас редактирование работает локально, без отправки на backend.
             </p>
           </div>
+
+          {successMessage && (
+            <p className="mb-6 inline-flex rounded-2xl border border-green-300 bg-green-100 px-5 py-3 text-sm font-semibold text-green-800">
+              {successMessage}
+            </p>
+          )}
+
+          {error && profileForm && (
+            <p className="mb-6 inline-flex rounded-2xl border border-red-300 bg-red-100 px-5 py-3 text-sm font-semibold text-red-800">
+              {error}
+            </p>
+          )}
 
           <div className="grid gap-8 lg:grid-cols-[360px_1fr]">
             <aside className="relative rounded-[34px] border border-white/60 bg-white/70 p-6 shadow-[0_25px_80px_rgba(80,0,120,0.16)] backdrop-blur-xl">
@@ -191,7 +281,7 @@ export function ProfilePage() {
 
               <div className="mt-6">
                 <h2 className="text-3xl font-black text-[#100516]">
-                  {displayName}
+                  {profileForm.displayName || 'Пользователь'}
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-600">{user.email}</p>
@@ -214,7 +304,9 @@ export function ProfilePage() {
                   </p>
 
                   <p className="mt-1 text-sm font-semibold text-[#100516]">
-                    Профиль подключён к backend
+                    {isEditing
+                      ? 'Локальное редактирование'
+                      : 'Профиль подключён к backend'}
                   </p>
                 </div>
               </div>
@@ -234,76 +326,87 @@ export function ProfilePage() {
                   </div>
 
                   <span className="rounded-full bg-[#100516] px-4 py-2 text-xs font-bold text-white">
-                    Только просмотр
+                    {isEditing ? 'Редактирование' : 'Только просмотр'}
                   </span>
                 </div>
 
                 <div className="grid gap-5 md:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-sm font-bold text-[#100516]">
-                      Имя
-                    </label>
+                  <Input
+                    label="Имя"
+                    value={profileForm.displayName}
+                    readOnly={!isEditing}
+                    onChange={(event) =>
+                      handleChange('displayName', event.target.value)
+                    }
+                  />
 
-                    <input
-                      className="w-full rounded-2xl border border-[#d923ff]/45 bg-white/80 px-4 py-3 text-sm text-[#100516] outline-none"
-                      value={displayName}
-                      readOnly
-                    />
-                  </div>
+                  <Input
+                    label="Город"
+                    value={profileForm.city}
+                    readOnly={!isEditing}
+                    onChange={(event) =>
+                      handleChange('city', event.target.value)
+                    }
+                  />
 
-                  <div>
-                    <label className="mb-2 block text-sm font-bold text-[#100516]">
-                      Город
-                    </label>
+                  <Input
+                    label="Возраст / дата рождения"
+                    value={profileForm.birthDate}
+                    readOnly={!isEditing}
+                    onChange={(event) =>
+                      handleChange('birthDate', event.target.value)
+                    }
+                  />
 
-                    <input
-                      className="w-full rounded-2xl border border-[#d923ff]/45 bg-white/80 px-4 py-3 text-sm text-[#100516] outline-none"
-                      value="Будет добавлено позже"
-                      readOnly
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-bold text-[#100516]">
-                      Возраст / дата рождения
-                    </label>
-
-                    <input
-                      className="w-full rounded-2xl border border-[#d923ff]/45 bg-white/80 px-4 py-3 text-sm text-[#100516] outline-none"
-                      value={birthDate}
-                      readOnly
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-bold text-[#100516]">
-                      Email
-                    </label>
-
-                    <input
-                      className="w-full rounded-2xl border border-[#d923ff]/45 bg-white/80 px-4 py-3 text-sm text-[#100516] outline-none"
-                      value={user.email}
-                      readOnly
-                    />
-                  </div>
+                  <Input label="Email" value={user.email} readOnly />
                 </div>
 
                 <div className="mt-5">
                   <div className="mb-2 flex items-center justify-between">
-                    <label className="block text-sm font-bold text-[#100516]">
+                    <label
+                      className="block text-sm font-bold text-[#100516]"
+                      htmlFor="profile-bio"
+                    >
                       О себе
                     </label>
 
                     <span className="text-xs font-semibold text-gray-500">
-                      {bio.length}/500
+                      {profileForm.bio.length}/500
                     </span>
                   </div>
 
                   <textarea
-                    className="min-h-36 w-full resize-none rounded-2xl border border-[#d923ff]/45 bg-white/80 px-4 py-3 text-sm leading-6 text-[#100516] outline-none"
-                    value={bio}
-                    readOnly
+                    className="min-h-36 w-full resize-none rounded-2xl border border-[#d923ff]/45 bg-white/80 px-4 py-3 text-sm leading-6 text-[#100516] outline-none transition focus:border-[#d923ff] focus:ring-4 focus:ring-[#d923ff]/20 read-only:focus:ring-0"
+                    id="profile-bio"
+                    value={profileForm.bio}
+                    readOnly={!isEditing}
+                    maxLength={500}
+                    onChange={(event) =>
+                      handleChange('bio', event.target.value)
+                    }
                   />
+                </div>
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  {isEditing ? (
+                    <>
+                      <Button type="button" onClick={handleSaveProfile}>
+                        Сохранить
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant="light"
+                        onClick={handleCancelEditing}
+                      >
+                        Отменить
+                      </Button>
+                    </>
+                  ) : (
+                    <Button type="button" onClick={handleStartEditing}>
+                      Редактировать профиль
+                    </Button>
+                  )}
                 </div>
               </section>
 
@@ -320,13 +423,9 @@ export function ProfilePage() {
                     </p>
                   </div>
 
-                  <button
-                    className="rounded-2xl bg-[#d923ff] px-6 py-3 text-sm font-bold text-white shadow-[0_0_25px_rgba(217,35,255,0.35)] transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-80"
-                    type="button"
-                    disabled
-                  >
+                  <Button type="button" disabled>
                     Редактирование скоро
-                  </button>
+                  </Button>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
@@ -337,12 +436,9 @@ export function ProfilePage() {
 
                     <div className="flex flex-wrap gap-3">
                       {mockGenres.map((genre) => (
-                        <span
-                          className="rounded-full border border-[#d923ff] bg-[#fff8c7] px-5 py-2 text-sm font-bold text-[#100516]"
-                          key={genre}
-                        >
+                        <Tag key={genre} variant="genre">
                           {genre}
-                        </span>
+                        </Tag>
                       ))}
                     </div>
                   </div>
@@ -354,12 +450,9 @@ export function ProfilePage() {
 
                     <div className="flex flex-wrap gap-3">
                       {mockArtists.map((artist) => (
-                        <span
-                          className="rounded-full border border-[#d923ff] bg-[#f8c7ff] px-5 py-2 text-sm font-bold text-[#100516]"
-                          key={artist}
-                        >
+                        <Tag key={artist} variant="artist">
                           {artist}
-                        </span>
+                        </Tag>
                       ))}
                     </div>
                   </div>
@@ -379,8 +472,8 @@ export function ProfilePage() {
 
                     <p className="mt-3 max-w-xl text-sm leading-6 text-white/70">
                       В ленте будет отображаться короткая карточка: имя, фото,
-                      описание и музыкальные совпадения. Позже этот блок можно
-                      связать с реальным backend.
+                      описание и музыкальные совпадения. Сейчас preview
+                      обновляется после локального сохранения.
                     </p>
                   </div>
 
@@ -389,20 +482,17 @@ export function ProfilePage() {
                       {avatarLetter}
                     </div>
 
-                    <h3 className="text-xl font-black">{displayName}</h3>
+                    <h3 className="text-xl font-black">
+                      {profileForm.displayName || 'Пользователь'}
+                    </h3>
 
                     <p className="mt-1 text-xs text-[#e8c8f3]">
                       {mockGenres.slice(0, 2).join(', ')}
                     </p>
 
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-[#d923ff] px-3 py-1 text-xs font-bold">
-                        87% совпадение
-                      </span>
-
-                      <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold">
-                        Indie
-                      </span>
+                      <Tag variant="dark">87% совпадение</Tag>
+                      <Tag variant="dark">Indie</Tag>
                     </div>
                   </div>
                 </div>

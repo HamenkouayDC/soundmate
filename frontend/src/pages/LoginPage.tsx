@@ -2,6 +2,8 @@ import type { FormEvent } from 'react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 
+import { Button } from '../components/ui/Button'
+import { Input } from '../components/ui/Input'
 import { loginUser } from '../shared/api/authApi'
 import { saveTokens } from '../shared/api/tokenStorage'
 
@@ -73,16 +75,16 @@ export function LoginPage() {
           </p>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
-            <input
-              className="w-full rounded-2xl border border-[#d923ff]/40 bg-white px-4 py-3 text-sm text-[#100516] outline-none transition placeholder:text-gray-500 focus:border-[#d923ff] focus:ring-4 focus:ring-[#d923ff]/20"
+            <Input
+              className="border-[#d923ff]/40 bg-white"
               type="email"
               placeholder="Email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
 
-            <input
-              className="w-full rounded-2xl border border-[#d923ff]/40 bg-white px-4 py-3 text-sm text-[#100516] outline-none transition placeholder:text-gray-500 focus:border-[#d923ff] focus:ring-4 focus:ring-[#d923ff]/20"
+            <Input
+              className="border-[#d923ff]/40 bg-white"
               type="password"
               placeholder="Пароль"
               value={password}
@@ -95,13 +97,9 @@ export function LoginPage() {
               </p>
             )}
 
-            <button
-              className="w-full rounded-2xl bg-[#d923ff] px-4 py-3 font-bold text-white shadow-[0_0_25px_rgba(217,35,255,0.45)] transition hover:scale-[1.02] hover:bg-[#c316ef] disabled:cursor-not-allowed disabled:bg-gray-500"
-              type="submit"
-              disabled={isLoading}
-            >
+            <Button fullWidth type="submit" disabled={isLoading}>
               {isLoading ? 'Вход...' : 'Войти'}
-            </button>
+            </Button>
           </form>
 
           <div className="my-5 flex items-center gap-3">
@@ -111,21 +109,13 @@ export function LoginPage() {
           </div>
 
           <div className="space-y-3">
-            <button
-              className="w-full rounded-2xl bg-white/80 px-4 py-3 text-sm font-semibold text-gray-500"
-              type="button"
-              disabled
-            >
+            <Button fullWidth variant="light" disabled>
               Войти с Google — скоро
-            </button>
+            </Button>
 
-            <button
-              className="w-full rounded-2xl bg-white/80 px-4 py-3 text-sm font-semibold text-gray-500"
-              type="button"
-              disabled
-            >
+            <Button fullWidth variant="light" disabled>
               Войти с Telegram — скоро
-            </button>
+            </Button>
           </div>
 
           <p className="mt-6 text-sm text-[#e8c8f3]">
