@@ -6,6 +6,7 @@ import { ChatPage } from './pages/ChatPage'
 import { FeedPage } from './pages/FeedPage'
 import { LoginPage } from './pages/LoginPage'
 import { MatchesPage } from './pages/MatchesPage'
+import { MusicPage } from './pages/MusicPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -64,6 +65,15 @@ function App() {
           element={
             <ProtectedRoute>
               <MatchesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/music"
+          element={
+            <ProtectedRoute>
+              <MusicPage />
             </ProtectedRoute>
           }
         />

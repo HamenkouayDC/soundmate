@@ -2,9 +2,38 @@ import { Link, useNavigate } from 'react-router'
 
 import { clearTokens } from '../../shared/api/tokenStorage'
 
+type ActivePage = 'feed' | 'matches' | 'music' | 'profile'
+
 type AppHeaderProps = {
-  activePage: 'feed' | 'matches' | 'profile'
+  activePage: ActivePage
 }
+
+const navItems: Array<{
+  label: string
+  path: string
+  page: ActivePage
+}> = [
+  {
+    label: 'Лента',
+    path: '/feed',
+    page: 'feed',
+  },
+  {
+    label: 'Матчи',
+    path: '/matches',
+    page: 'matches',
+  },
+  {
+    label: 'Музыка',
+    path: '/music',
+    page: 'music',
+  },
+  {
+    label: 'Профиль',
+    path: '/profile',
+    page: 'profile',
+  },
+]
 
 export function AppHeader({ activePage }: AppHeaderProps) {
   const navigate = useNavigate()
@@ -14,57 +43,51 @@ export function AppHeader({ activePage }: AppHeaderProps) {
     navigate('/login')
   }
 
-  function getLinkClass(page: 'feed' | 'matches' | 'profile') {
-    const baseClass =
-      'rounded-xl px-5 py-2 text-sm font-semibold transition hover:scale-105'
-
-    if (activePage === page) {
-      return `${baseClass} bg-[#d923ff] text-white shadow-[0_0_20px_rgba(217,35,255,0.45)]`
-    }
-
-    return `${baseClass} bg-white/10 text-white hover:bg-white/20`
-  }
-
   return (
-    <header className="border-b border-white/10 bg-[#050208]/95 backdrop-blur">
-      <div className="mx-auto flex min-h-24 max-w-6xl flex-col items-center justify-between gap-4 px-6 py-4 md:flex-row">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-[#08050d]/95 px-6 py-4 text-white shadow-[0_12px_40px_rgba(0,0,0,0.25)] backdrop-blur-xl">
+      <div className="mx-auto flex max-w-6xl flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <Link className="flex items-center gap-3" to="/feed">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#d923ff] bg-[#16051f] text-2xl text-[#f13bff] shadow-[0_0_25px_rgba(217,35,255,0.35)]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#f13bff] bg-black/30 text-2xl font-black text-[#f13bff] shadow-[0_0_25px_rgba(217,35,255,0.45)]">
             ♪
-          </div>
+          </span>
 
           <div>
-            <p className="text-xl font-black tracking-wide text-white">
-              SoundMate
-            </p>
-
-            <p className="text-xs text-[#d8b8e8]">
-              знакомства по музыкальному вкусу
+            <p className="text-lg font-black leading-none">SoundMate</p>
+            <p className="mt-1 text-xs font-semibold text-[#e8c8f3]">
+              music dating
             </p>
           </div>
         </Link>
 
-        <nav className="flex flex-wrap items-center justify-center gap-3">
-          <Link className={getLinkClass('feed')} to="/feed">
-            Лента
-          </Link>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <nav className="flex flex-wrap gap-2">
+            {navItems.map((item) => {
+              const isActive = activePage === item.page
 
-          <Link className={getLinkClass('matches')} to="/matches">
-            Матчи
-          </Link>
-
-          <Link className={getLinkClass('profile')} to="/profile">
-            Профиль
-          </Link>
+              return (
+                <Link
+                  className={`rounded-2xl px-4 py-2 text-sm font-bold transition ${
+                    isActive
+                      ? 'bg-[#d923ff] text-white shadow-[0_0_22px_rgba(217,35,255,0.35)]'
+                      : 'bg-white/10 text-[#e8c8f3] hover:bg-white/20 hover:text-white'
+                  }`}
+                  key={item.path}
+                  to={item.path}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
+          </nav>
 
           <button
-            className="rounded-xl bg-white/10 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+            className="rounded-2xl border border-white/15 bg-white px-4 py-2 text-sm font-bold text-[#100516] transition hover:bg-[#f8f0ff]"
             type="button"
             onClick={handleLogout}
           >
             Выйти
           </button>
-        </nav>
+        </div>
       </div>
     </header>
   )
