@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import { clearTokens } from '../../shared/api/tokenStorage'
 
 type AppHeaderProps = {
-  activePage: 'feed' | 'profile'
+  activePage: 'feed' | 'matches' | 'profile'
 }
 
 export function AppHeader({ activePage }: AppHeaderProps) {
@@ -14,7 +14,7 @@ export function AppHeader({ activePage }: AppHeaderProps) {
     navigate('/login')
   }
 
-  function getLinkClass(page: 'feed' | 'profile') {
+  function getLinkClass(page: 'feed' | 'matches' | 'profile') {
     const baseClass =
       'rounded-xl px-5 py-2 text-sm font-semibold transition hover:scale-105'
 
@@ -44,9 +44,13 @@ export function AppHeader({ activePage }: AppHeaderProps) {
           </div>
         </Link>
 
-        <nav className="flex items-center gap-3">
+        <nav className="flex flex-wrap items-center justify-center gap-3">
           <Link className={getLinkClass('feed')} to="/feed">
             Лента
+          </Link>
+
+          <Link className={getLinkClass('matches')} to="/matches">
+            Матчи
           </Link>
 
           <Link className={getLinkClass('profile')} to="/profile">
