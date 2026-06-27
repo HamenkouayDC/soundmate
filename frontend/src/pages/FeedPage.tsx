@@ -1,6 +1,8 @@
 import { useState } from 'react'
 
 import { AppHeader } from '../components/layout/AppHeader'
+import { DecorativeDisc } from '../components/ui/DecorativeDisc'
+import { PageHeader } from '../components/ui/PageHeader'
 
 type FeedUser = {
   id: number
@@ -82,14 +84,7 @@ export function FeedPage() {
       <section className="relative overflow-hidden px-6 py-8 md:py-10">
         <div className="pointer-events-none absolute left-0 top-52 h-44 w-full bg-[linear-gradient(90deg,transparent,rgba(217,35,255,0.14),transparent)] blur-2xl" />
 
-        <div
-          className="pointer-events-none absolute -left-40 top-28 hidden h-[420px] w-[420px] rounded-full opacity-[0.08] blur-[0.5px] lg:block"
-          style={{
-            background:
-              'radial-gradient(circle at center, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.9) 7%, rgba(185,80,190,0.55) 8%, rgba(185,80,190,0.55) 14%, transparent 15%, transparent 28%, rgba(255,255,255,0.25) 29%, rgba(255,255,255,0.25) 31%, transparent 32%), conic-gradient(from 40deg, #160014, #7c0b78, #e13cff, #5d0a68, #ff70d9, #26001f, #b912bf, #160014)',
-            boxShadow: '0 0 120px rgba(217,35,255,0.22)',
-          }}
-        />
+        <DecorativeDisc position="left" opacity="0.08" />
 
         {lastAction && (
           <div className="pointer-events-none fixed left-1/2 top-4 z-50 w-[calc(100%-32px)] max-w-md -translate-x-1/2 rounded-2xl border border-white/60 bg-white/90 px-5 py-3 text-center text-sm font-semibold text-[#100516] shadow-xl backdrop-blur-xl">
@@ -98,20 +93,11 @@ export function FeedPage() {
         )}
 
         <div className="relative z-10 mx-auto max-w-6xl">
-          <div className="mb-8">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#9c20c7]">
-              Лента анкет
-            </p>
-
-            <h1 className="mt-2 max-w-3xl text-4xl font-black text-[#100516] md:text-5xl">
-              Люди с похожим музыкальным вкусом
-            </h1>
-
-            <p className="mt-4 max-w-2xl text-base leading-7 text-gray-600">
-              Пока здесь mock-данные. Позже карточки будут приходить с backend:
-              рекомендации, совпадения, лайки и матчи.
-            </p>
-          </div>
+          <PageHeader
+            label="Лента анкет"
+            title="Люди с похожим музыкальным вкусом"
+            description="Пока здесь mock-данные. Позже карточки будут приходить с backend: рекомендации, совпадения, лайки и матчи."
+          />
 
           <div className="grid gap-8 lg:grid-cols-[1fr_440px] lg:items-start">
             <aside className="hidden rounded-[34px] border border-white/60 bg-white/70 p-8 shadow-[0_25px_80px_rgba(80,0,120,0.14)] backdrop-blur-xl lg:block">

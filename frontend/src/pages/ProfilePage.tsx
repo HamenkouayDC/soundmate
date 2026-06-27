@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router'
 
 import { AppHeader } from '../components/layout/AppHeader'
 import { Button } from '../components/ui/Button'
+import { DecorativeDisc } from '../components/ui/DecorativeDisc'
 import { Input } from '../components/ui/Input'
+import { PageHeader } from '../components/ui/PageHeader'
 import { Tag } from '../components/ui/Tag'
 import { ApiError } from '../shared/api/apiClient'
 import { refreshAccessToken } from '../shared/api/authApi'
@@ -115,6 +117,7 @@ export function ProfilePage() {
 
   function handleChange(field: keyof ProfileForm, value: string) {
     setSuccessMessage('')
+    setError('')
 
     setProfileForm((currentForm) => {
       if (!currentForm) {
@@ -130,12 +133,14 @@ export function ProfilePage() {
 
   function handleStartEditing() {
     setSuccessMessage('')
+    setError('')
     setIsEditing(true)
   }
 
   function handleCancelEditing() {
     setProfileForm(savedProfileForm)
     setSuccessMessage('')
+    setError('')
     setIsEditing(false)
   }
 
@@ -195,34 +200,18 @@ export function ProfilePage() {
       <AppHeader activePage="profile" />
 
       <section className="relative overflow-hidden px-6 py-10">
-        <div
-          className="pointer-events-none absolute -right-36 top-32 hidden h-[590px] w-[590px] rounded-full opacity-[0.10] blur-[0.5px] lg:block"
-          style={{
-            background:
-              'radial-gradient(circle at center, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.92) 7%, rgba(185,80,190,0.55) 8%, rgba(185,80,190,0.55) 14%, transparent 15%, transparent 26%, rgba(255,255,255,0.32) 27%, rgba(255,255,255,0.32) 29%, transparent 30%, transparent 42%, rgba(255,255,255,0.18) 43%, rgba(255,255,255,0.18) 44%, transparent 45%), conic-gradient(from 30deg, #160014, #7c0b78, #e13cff, #5d0a68, #ff70d9, #26001f, #b912bf, #160014)',
-            boxShadow: '0 0 140px rgba(217,35,255,0.28)',
-          }}
-        />
+        <DecorativeDisc position="right" opacity="0.10" />
 
         <div className="pointer-events-none absolute -right-16 top-28 hidden h-[520px] w-[520px] rounded-full bg-[#d923ff]/10 blur-3xl lg:block" />
 
         <div className="pointer-events-none absolute left-0 top-52 h-44 w-full bg-[linear-gradient(90deg,transparent,rgba(217,35,255,0.14),transparent)] blur-2xl" />
 
         <div className="relative z-10 mx-auto max-w-6xl">
-          <div className="mb-8">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#9c20c7]">
-              Мой профиль
-            </p>
-
-            <h1 className="mt-2 max-w-3xl text-4xl font-black text-[#100516] md:text-5xl">
-              Настрой, как тебя увидят другие
-            </h1>
-
-            <p className="mt-4 max-w-2xl text-base leading-7 text-gray-600">
-              Здесь собрана основная информация о тебе и музыкальные интересы.
-              Сейчас редактирование работает локально, без отправки на backend.
-            </p>
-          </div>
+          <PageHeader
+            label="Мой профиль"
+            title="Настрой, как тебя увидят другие"
+            description="Здесь собрана основная информация о тебе и музыкальные интересы. Сейчас редактирование работает локально, без отправки на backend."
+          />
 
           {successMessage && (
             <p className="mb-6 inline-flex rounded-2xl border border-green-300 bg-green-100 px-5 py-3 text-sm font-semibold text-green-800">
