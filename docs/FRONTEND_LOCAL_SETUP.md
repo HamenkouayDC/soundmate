@@ -189,7 +189,21 @@ http://localhost:8000/api/v1/
    { "refresh": "..." }
    ```
 
+5. **Профиль (Week 2)** — `GET /profiles/me/`, `PATCH /profiles/me/`
+   ```json
+   { "display_name": "...", "bio": "...", "birth_date": "2000-01-15", "avatar_url": "https://...", "preview_track_url": "https://..." }
+   ```
+   Header: `Authorization: Bearer <access>`. Все поля в PATCH опциональны.
+
+6. **Music Passport (stub)** — `GET/POST /music/connections/`, `DELETE /music/connections/<id>/`
+   ```json
+   { "provider": "spotify", "external_user_id": "user_123" }
+   ```
+   Провайдеры: `spotify`, `lastfm`, `soundcloud`, `yandex`
+
 CORS уже разрешён для `http://localhost:5173` (Vite).
+
+Подробный контракт: `docs/BACKEND_HANDOFF.md`
 
 ---
 
@@ -251,10 +265,10 @@ npm run dev
 
 ## Чего в API пока нет
 
-- PATCH профиля
-- Лента, лайки, скипы, матчи
+- Лента, лайки, скипы, матчи, «Волна»
+- Полный OAuth Spotify/Яндекс (music connections пока stub)
 
-Есть в Swagger: health, register, login, refresh, me.
+Есть в Swagger: health, auth, `/users/me`, `/profiles/me`, `/music/connections/`.
 
 ---
 
