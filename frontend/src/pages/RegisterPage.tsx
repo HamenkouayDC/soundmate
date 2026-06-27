@@ -81,7 +81,7 @@ export function RegisterPage() {
           </h2>
 
           <p className="mb-6 text-sm text-[#e8c8f3]">
-            Заполни данные, чтобы начать искать людей с похожими треками.
+            Регистрация доступна через имя, email и пароль.
           </p>
 
           <form className="space-y-4" onSubmit={handleSubmit}>

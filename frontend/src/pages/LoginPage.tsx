@@ -71,7 +71,7 @@ export function LoginPage() {
           </h2>
 
           <p className="mb-6 text-sm text-[#e8c8f3]">
-            Войди, чтобы продолжить искать людей с похожим вкусом.
+            Войди через email и пароль, чтобы продолжить.
           </p>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
@@ -101,22 +101,6 @@ export function LoginPage() {
               {isLoading ? 'Вход...' : 'Войти'}
             </Button>
           </form>
-
-          <div className="my-5 flex items-center gap-3">
-            <div className="h-px flex-1 bg-white/20" />
-            <span className="text-xs text-[#e8c8f3]">или</span>
-            <div className="h-px flex-1 bg-white/20" />
-          </div>
-
-          <div className="space-y-3">
-            <Button fullWidth variant="light" disabled>
-              Войти с Google — скоро
-            </Button>
-
-            <Button fullWidth variant="light" disabled>
-              Войти с Telegram — скоро
-            </Button>
-          </div>
 
           <p className="mt-6 text-sm text-[#e8c8f3]">
             Нет аккаунта?{' '}
