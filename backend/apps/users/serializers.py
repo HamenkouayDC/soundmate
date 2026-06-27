@@ -1,21 +1,8 @@
 from rest_framework import serializers
 
 from apps.profiles.models import Profile
+from apps.profiles.serializers import ProfileSerializer
 from apps.users.models import User
-
-
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Profile
-        fields = (
-            "id",
-            "display_name",
-            "birth_date",
-            "bio",
-            "avatar_url",
-            "preview_track_url",
-            "updated_at",
-        )
 
 
 class UserSerializer(serializers.ModelSerializer):

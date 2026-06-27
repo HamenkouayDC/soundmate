@@ -1,30 +1,34 @@
-# Soundmate Backend — передача команде (Week 1)
+# Soundmate Backend — передача команде
 
-Документ для Team Lead, Frontend и второго backend-разработчика.
+Документ для Team Lead и Frontend.
 
 ---
 
-## Статус Week 1
+## Статус
 
-| Этап | Статус | Содержание |
-|------|--------|------------|
-| 1 | ✅ | Каркас Django, apps, healthcheck, Docker (для отчёта) |
-| 2 | ✅ | Модели User, Profile, Music Passport, Wave, Match, Admin |
-| 3 | ✅ | Auth API: register, login, refresh, `/users/me` |
+| Неделя | Статус | Содержание |
+|--------|--------|------------|
+| Week 1 | ✅ | Каркас, модели, auth API |
+| Week 2 | ✅ | CRUD профиля, music connections (stub) |
 
 **Репозиторий:** https://github.com/HamenkouayDC/soundmate
 
-**Стек:** Python 3.12, Django 5, DRF, simplejwt, PostgreSQL 18 (локально, без Docker в разработке).
+**Стек:** Python 3.12, Django 5, DRF, simplejwt, PostgreSQL 18.
+
+**Разработка:** локально Python + PostgreSQL (без Docker на ПК).  
+**Деплой на VDS:** Docker — после получения доступов от куратора.
+
+**Backend-команда:** один разработчик.
 
 ---
 
 ## Для Team Lead
 
 - Monorepo: код backend в папке `backend/`
-- `docker-compose.yml` — для отчётности по стеку, в разработке не используем
-- Подробная настройка: [`docs/BACKEND_SETUP.md`](BACKEND_SETUP.md)
+- `docker-compose.yml` — для деплоя на VDS куратора
+- Настройка локально: [`docs/BACKEND_SETUP.md`](BACKEND_SETUP.md), [`docs/FRONTEND_LOCAL_SETUP.md`](FRONTEND_LOCAL_SETUP.md)
 - После `git pull`: `pip install -r requirements.txt` и `python manage.py migrate`
-- История git была переписана (удалён Co-authored-by) — нужен обычный `git pull`
+- Куратор: тимлиду написать `#VDS` в ЛС для доступов **команды 10** (не team17)
 
 ---
 
@@ -36,91 +40,68 @@
 http://localhost:8000/api/v1/
 ```
 
-Backend должен быть запущен на машине backend-разработчика (`python manage.py runserver`).
+Swagger: http://localhost:8000/api/docs/
 
-### Swagger (главный источник правды)
+### Auth
 
+**Регистрация** — `POST /api/v1/auth/register/`
+```json
+{ "email": "...", "password": "мин 8 символов", "display_name": "Имя" }
 ```
-http://localhost:8000/api/docs/
+
+**Логин** — `POST /api/v1/auth/login/`
+```json
+{ "email": "...", "password": "..." }
 ```
+Ответ: `{ "access": "...", "refresh": "..." }`
 
-### Auth — контракт
+**Refresh** — `POST /api/v1/auth/refresh/` с `{ "refresh": "..." }`
 
-**Регистрация**
-```http
-POST /api/v1/auth/register/
-Content-Type: application/json
+**Текущий пользователь** — `GET /api/v1/users/me/`  
+Header: `Authorization: Bearer <access>`
 
-{
-  "email": "user@example.com",
-  "password": "минимум 8 символов",
-  "display_name": "Имя"
-}
-```
-Ответ `201`: объект user + profile (без пароля).
+### Профиль (Week 2)
 
-**Логин**
-```http
-POST /api/v1/auth/login/
+**Читать свой профиль** — `GET /api/v1/profiles/me/`
 
-{
-  "email": "user@example.com",
-  "password": "пароль"
-}
-```
-Ответ `200`:
+**Обновить** — `PATCH /api/v1/profiles/me/`
 ```json
 {
-  "access": "eyJ...",
-  "refresh": "eyJ..."
+  "display_name": "Новое имя",
+  "bio": "О себе",
+  "birth_date": "2000-01-15",
+  "avatar_url": "https://...",
+  "preview_track_url": "https://..."
 }
 ```
+Все поля опциональны (partial update).  
+`mood_profile` и `music_embedding` — только чтение (заполнит ML).
 
-**Обновить access** (срок жизни ~30 мин)
-```http
-POST /api/v1/auth/refresh/
+### Music Passport (Week 2, stub без OAuth)
 
+**Список подключений** — `GET /api/v1/music/connections/`
+
+**Подключить сервис** — `POST /api/v1/music/connections/`
+```json
 {
-  "refresh": "eyJ..."
+  "provider": "spotify",
+  "external_user_id": "spotify_user_123"
 }
 ```
+Провайдеры: `spotify`, `lastfm`, `soundcloud`, `yandex`
 
-**Текущий пользователь**
-```http
-GET /api/v1/users/me/
-Authorization: Bearer <access>
-```
+**Отключить** — `DELETE /api/v1/music/connections/<uuid>/`  
+(мягкое отключение: `is_active=false`)
+
+Полный OAuth Spotify/Яндекс — позже.
 
 ### CORS
 
-Разрешены origins из `backend/.env`:
-- `http://localhost:5173` (Vite)
-- `http://127.0.0.1:5173`
-
-Другой порт — согласовать с backend, добавим в `CORS_ALLOWED_ORIGINS`.
+`http://localhost:5173`, `http://127.0.0.1:5173` — из `backend/.env`.
 
 ### Healthcheck
 
-```http
-GET /api/v1/health/
-```
-Ответ: `{"status":"ok","service":"soundmate-api","version":"0.1.0"}`
-
-### Что на стороне Frontend
-
-- Хранение `access` / `refresh` (localStorage, memory — на выбор)
-- Заголовок `Authorization: Bearer <access>` для защищённых запросов
-- UI профиля, лента, «Волна» — API появится на следующих неделях
-
----
-
-## Для второго backend
-
-1. Клонировать репо
-2. Python 3.12 + PostgreSQL 18 (те же версии)
-3. См. [`backend/README.md`](../backend/README.md) и [`BACKEND_SETUP.md`](BACKEND_SETUP.md)
-4. Скопировать `backend/.env.example` → `backend/.env`, настроить пароль БД
-5. `python -m venv .venv` → `pip install -r requirements.txt` → `migrate` → `runserver`
+`GET /api/v1/health/` → `{"status":"ok",...}`
 
 ---
 
@@ -133,17 +114,12 @@ GET /api/v1/health/
 | `music` | MusicConnection, MusicTaste |
 | `matching` | WaveSession, Match |
 
-Просмотр данных: http://localhost:8000/admin/
+Admin: http://localhost:8000/admin/
 
 ---
 
-## Схема подключения
+## Схема (локально)
 
 ```
-React (localhost:5173)
-        │  HTTP + JSON
-        ▼
-Django API (localhost:8000)
-        ▼
-PostgreSQL (localhost:5432, БД soundmate)
+React (localhost:5173) → Django API (localhost:8000) → PostgreSQL
 ```
