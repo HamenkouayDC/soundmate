@@ -79,7 +79,7 @@ export function FeedPage() {
     <main className="min-h-screen bg-[#f8f0ff]">
       <AppHeader activePage="feed" />
 
-      <section className="relative overflow-hidden px-6 py-10">
+      <section className="relative overflow-hidden px-6 py-8 md:py-10">
         <div className="pointer-events-none absolute left-0 top-52 h-44 w-full bg-[linear-gradient(90deg,transparent,rgba(217,35,255,0.14),transparent)] blur-2xl" />
 
         <div
@@ -90,6 +90,12 @@ export function FeedPage() {
             boxShadow: '0 0 120px rgba(217,35,255,0.22)',
           }}
         />
+
+        {lastAction && (
+          <div className="pointer-events-none fixed left-1/2 top-4 z-50 w-[calc(100%-32px)] max-w-md -translate-x-1/2 rounded-2xl border border-white/60 bg-white/90 px-5 py-3 text-center text-sm font-semibold text-[#100516] shadow-xl backdrop-blur-xl">
+            {lastAction}
+          </div>
+        )}
 
         <div className="relative z-10 mx-auto max-w-6xl">
           <div className="mb-8">
@@ -106,12 +112,6 @@ export function FeedPage() {
               рекомендации, совпадения, лайки и матчи.
             </p>
           </div>
-
-          {lastAction && (
-            <p className="mb-6 inline-flex rounded-2xl border border-white/60 bg-white/75 px-5 py-3 text-sm font-semibold text-[#100516] shadow-xl backdrop-blur-xl">
-              {lastAction}
-            </p>
-          )}
 
           <div className="grid gap-8 lg:grid-cols-[1fr_440px] lg:items-start">
             <aside className="hidden rounded-[34px] border border-white/60 bg-white/70 p-8 shadow-[0_25px_80px_rgba(80,0,120,0.14)] backdrop-blur-xl lg:block">
@@ -134,6 +134,7 @@ export function FeedPage() {
                   <p className="text-sm font-black text-[#100516]">
                     Совместимость
                   </p>
+
                   <p className="mt-2 text-sm text-gray-600">
                     Процент показывает условное совпадение музыкального вкуса.
                   </p>
@@ -143,6 +144,7 @@ export function FeedPage() {
                   <p className="text-sm font-black text-[#100516]">
                     Лайк / следующий
                   </p>
+
                   <p className="mt-2 text-sm text-gray-600">
                     Действия пока работают локально и просто переключают
                     карточки.
@@ -151,6 +153,7 @@ export function FeedPage() {
 
                 <div className="rounded-3xl bg-[#08050d] p-5 text-white">
                   <p className="text-sm font-black">Backend позже</p>
+
                   <p className="mt-2 text-sm leading-6 text-white/70">
                     После появления endpoint’ов лента будет получать реальные
                     рекомендации.
@@ -161,7 +164,7 @@ export function FeedPage() {
 
             <div className="flex justify-center lg:justify-end">
               {currentUser ? (
-                <article className="relative h-[650px] w-full max-w-[440px] overflow-hidden rounded-[36px] border border-[#d923ff]/70 bg-[#050208] shadow-[0_30px_90px_rgba(80,0,120,0.28)]">
+                <article className="relative h-[620px] w-full max-w-[440px] overflow-hidden rounded-[36px] border border-[#d923ff]/70 bg-[#050208] shadow-[0_30px_90px_rgba(80,0,120,0.28)] md:h-[650px]">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#18091f] via-[#381145] to-[#050208]" />
 
                   <div className="absolute inset-0 opacity-80">
@@ -182,7 +185,7 @@ export function FeedPage() {
                     ))}
                   </div>
 
-                  <div className="absolute inset-x-7 top-20 z-10 flex h-72 items-center justify-center overflow-hidden rounded-[30px] border border-white/10 bg-black/35 text-center">
+                  <div className="absolute inset-x-6 top-20 z-10 flex h-64 items-center justify-center overflow-hidden rounded-[30px] border border-white/10 bg-black/35 text-center md:inset-x-7 md:h-72">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(217,35,255,0.25),transparent_65%)]" />
 
                     <div className="relative">
@@ -196,7 +199,7 @@ export function FeedPage() {
                     </div>
                   </div>
 
-                  <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black via-black/95 to-transparent p-7 pt-32 text-white">
+                  <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black via-black/95 to-transparent p-6 pt-28 text-white md:p-7 md:pt-32">
                     <div className="mb-4 flex items-start justify-between gap-4">
                       <div>
                         <h2 className="text-3xl font-black">
