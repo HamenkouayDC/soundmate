@@ -9,6 +9,7 @@ import { PageHeader } from '../components/ui/PageHeader'
 import { Tag } from '../components/ui/Tag'
 import { ApiError } from '../shared/api/apiClient'
 import { refreshAccessToken } from '../shared/api/authApi'
+import { updateMyProfile, type MyProfile } from '../shared/api/profileApi'
 import { getCurrentUser, type CurrentUser } from '../shared/api/userApi'
 import {
   clearTokens,
@@ -27,6 +28,31 @@ type ProfileForm = {
   bio: string
 }
 
+function createFormFromUser(currentUser: CurrentUser): ProfileForm {
+  return {
+    displayName: currentUser.profile.display_name || 'Пользователь',
+    city: 'Будет добавлено позже',
+    birthDate: currentUser.profile.birth_date || '',
+    bio:
+      currentUser.profile.bio ||
+      'Расскажи немного о себе, любимой музыке и концертах, на которые хочешь сходить.',
+  }
+}
+
+function createFormFromProfile(
+  currentForm: ProfileForm,
+  updatedProfile: MyProfile,
+): ProfileForm {
+  return {
+    ...currentForm,
+    displayName: updatedProfile.display_name || 'Пользователь',
+    birthDate: updatedProfile.birth_date || '',
+    bio:
+      updatedProfile.bio ||
+      'Расскажи немного о себе, любимой музыке и концертах, на которые хочешь сходить.',
+  }
+}
+
 export function ProfilePage() {
   const navigate = useNavigate()
 
@@ -38,6 +64,7 @@ export function ProfilePage() {
 
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -52,15 +79,7 @@ export function ProfilePage() {
 
       try {
         const currentUser = await getCurrentUser(accessToken)
-
-        const initialForm: ProfileForm = {
-          displayName: currentUser.profile.display_name || 'Пользователь',
-          city: 'Будет добавлено позже',
-          birthDate: currentUser.profile.birth_date || 'Не указана',
-          bio:
-            currentUser.profile.bio ||
-            'Расскажи немного о себе, любимой музыке и концертах, на которые хочешь сходить.',
-        }
+        const initialForm = createFormFromUser(currentUser)
 
         setUser(currentUser)
         setProfileForm(initialForm)
@@ -81,15 +100,7 @@ export function ProfilePage() {
             saveAccessToken(newTokens.access)
 
             const currentUser = await getCurrentUser(newTokens.access)
-
-            const initialForm: ProfileForm = {
-              displayName: currentUser.profile.display_name || 'Пользователь',
-              city: 'Будет добавлено позже',
-              birthDate: currentUser.profile.birth_date || 'Не указана',
-              bio:
-                currentUser.profile.bio ||
-                'Расскажи немного о себе, любимой музыке и концертах, на которые хочешь сходить.',
-            }
+            const initialForm = createFormFromUser(currentUser)
 
             setUser(currentUser)
             setProfileForm(initialForm)
@@ -144,7 +155,36 @@ export function ProfilePage() {
     setIsEditing(false)
   }
 
-  function handleSaveProfile() {
+  function updateUserProfile(updatedProfile: MyProfile) {
+    setUser((currentUser) => {
+      if (!currentUser) {
+        return currentUser
+      }
+
+      return {
+        ...currentUser,
+        profile: {
+          ...currentUser.profile,
+          display_name: updatedProfile.display_name,
+          birth_date: updatedProfile.birth_date,
+          bio: updatedProfile.bio,
+          avatar_url: updatedProfile.avatar_url,
+          preview_track_url: updatedProfile.preview_track_url,
+          updated_at: updatedProfile.updated_at,
+        },
+      }
+    })
+  }
+
+  async function saveProfileWithToken(token: string, form: ProfileForm) {
+    return updateMyProfile(token, {
+      display_name: form.displayName.trim(),
+      birth_date: form.birthDate || null,
+      bio: form.bio.trim(),
+    })
+  }
+
+  async function handleSaveProfile() {
     if (!profileForm) {
       return
     }
@@ -155,10 +195,72 @@ export function ProfilePage() {
       return
     }
 
-    setError('')
-    setSavedProfileForm(profileForm)
-    setIsEditing(false)
-    setSuccessMessage('Изменения сохранены локально. Backend пока не обновляется.')
+    const accessToken = getAccessToken()
+
+    if (!accessToken) {
+      clearTokens()
+      navigate('/login')
+      return
+    }
+
+    try {
+      setIsSaving(true)
+      setError('')
+      setSuccessMessage('')
+
+      const updatedProfile = await saveProfileWithToken(accessToken, profileForm)
+      const updatedForm = createFormFromProfile(profileForm, updatedProfile)
+
+      updateUserProfile(updatedProfile)
+      setProfileForm(updatedForm)
+      setSavedProfileForm(updatedForm)
+      setIsEditing(false)
+      setSuccessMessage('Изменения профиля сохранены на backend.')
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        const refreshToken = getRefreshToken()
+
+        if (!refreshToken) {
+          clearTokens()
+          navigate('/login')
+          return
+        }
+
+        try {
+          const newTokens = await refreshAccessToken(refreshToken)
+
+          saveAccessToken(newTokens.access)
+
+          const updatedProfile = await saveProfileWithToken(
+            newTokens.access,
+            profileForm,
+          )
+          const updatedForm = createFormFromProfile(profileForm, updatedProfile)
+
+          updateUserProfile(updatedProfile)
+          setProfileForm(updatedForm)
+          setSavedProfileForm(updatedForm)
+          setIsEditing(false)
+          setSuccessMessage('Изменения профиля сохранены на backend.')
+        } catch (refreshError) {
+          if (refreshError instanceof Error) {
+            setError(refreshError.message)
+          } else {
+            setError('Не удалось сохранить профиль')
+          }
+        }
+
+        return
+      }
+
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Не удалось сохранить профиль')
+      }
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   if (isLoading) {
@@ -210,7 +312,7 @@ export function ProfilePage() {
           <PageHeader
             label="Мой профиль"
             title="Настрой, как тебя увидят другие"
-            description="Здесь собрана основная информация о тебе и музыкальные интересы. Сейчас редактирование работает локально, без отправки на backend."
+            description="Здесь собрана основная информация о тебе и музыкальные интересы. Имя, дата рождения и описание теперь сохраняются через backend."
           />
 
           {successMessage && (
@@ -294,8 +396,8 @@ export function ProfilePage() {
 
                   <p className="mt-1 text-sm font-semibold text-[#100516]">
                     {isEditing
-                      ? 'Локальное редактирование'
-                      : 'Профиль подключён к backend'}
+                      ? 'Редактирование профиля'
+                      : 'Профиль синхронизирован с backend'}
                   </p>
                 </div>
               </div>
@@ -310,7 +412,8 @@ export function ProfilePage() {
                     </h2>
 
                     <p className="mt-2 text-sm text-gray-600">
-                      Эти данные будут использоваться в анкете и рекомендациях.
+                      Имя, дата рождения и описание сохраняются через backend.
+                      Город пока остаётся mock-полем.
                     </p>
                   </div>
 
@@ -339,7 +442,8 @@ export function ProfilePage() {
                   />
 
                   <Input
-                    label="Возраст / дата рождения"
+                    label="Дата рождения"
+                    type="date"
                     value={profileForm.birthDate}
                     readOnly={!isEditing}
                     onChange={(event) =>
@@ -349,6 +453,11 @@ export function ProfilePage() {
 
                   <Input label="Email" value={user.email} readOnly />
                 </div>
+
+                <p className="mt-3 text-xs text-gray-500">
+                  Поле “Город” пока не отправляется на backend, потому что его
+                  нет в текущем контракте профиля.
+                </p>
 
                 <div className="mt-5">
                   <div className="mb-2 flex items-center justify-between">
@@ -379,13 +488,18 @@ export function ProfilePage() {
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                   {isEditing ? (
                     <>
-                      <Button type="button" onClick={handleSaveProfile}>
-                        Сохранить
+                      <Button
+                        type="button"
+                        disabled={isSaving}
+                        onClick={handleSaveProfile}
+                      >
+                        {isSaving ? 'Сохранение...' : 'Сохранить'}
                       </Button>
 
                       <Button
                         type="button"
                         variant="light"
+                        disabled={isSaving}
                         onClick={handleCancelEditing}
                       >
                         Отменить
@@ -407,8 +521,8 @@ export function ProfilePage() {
                     </h2>
 
                     <p className="mt-2 text-sm text-gray-600">
-                      Сейчас это mock-данные. Позже сюда можно подключить
-                      Spotify или backend-поля.
+                      Сейчас это mock-данные. Следующим шагом подключим экран
+                      музыкальных сервисов через backend.
                     </p>
                   </div>
 
@@ -461,8 +575,8 @@ export function ProfilePage() {
 
                     <p className="mt-3 max-w-xl text-sm leading-6 text-white/70">
                       В ленте будет отображаться короткая карточка: имя, фото,
-                      описание и музыкальные совпадения. Сейчас preview
-                      обновляется после локального сохранения.
+                      описание и музыкальные совпадения. После сохранения имя и
+                      описание уже обновляются через backend.
                     </p>
                   </div>
 
