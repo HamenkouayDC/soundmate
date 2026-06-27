@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  font-family:
+    Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #08050d;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
