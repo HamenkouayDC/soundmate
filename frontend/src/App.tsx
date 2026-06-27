@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router'
 
 import { ProtectedRoute } from './components/layout/ProtectedRoute'
+import { ChatPage } from './pages/ChatPage'
 import { FeedPage } from './pages/FeedPage'
 import { LoginPage } from './pages/LoginPage'
 import { MatchesPage } from './pages/MatchesPage'
@@ -40,6 +41,15 @@ function App() {
           element={
             <ProtectedRoute>
               <MatchesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/chat/:matchId"
+          element={
+            <ProtectedRoute>
+              <ChatPage />
             </ProtectedRoute>
           }
         />
