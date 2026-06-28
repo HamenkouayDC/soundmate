@@ -33,6 +33,11 @@ if [ ! -f .env ]; then
   sed -i "s/replace-with-long-random-secret/$SECRET/" .env
 fi
 
+set -a
+# shellcheck disable=SC1091
+source .env
+set +a
+
 .venv/bin/python manage.py migrate --noinput
 .venv/bin/python manage.py collectstatic --noinput 2>/dev/null || true
 
@@ -40,7 +45,7 @@ pkill -f "gunicorn config.wsgi" 2>/dev/null || true
 pkill -f "http.server" 2>/dev/null || true
 sleep 1
 
-nohup .venv/bin/gunicorn config.wsgi:application \
+nohup env $(grep -v '^#' .env | xargs) .venv/bin/gunicorn config.wsgi:application \
   --bind "0.0.0.0:${PORT}" \
   --workers 2 \
   --timeout 120 \
