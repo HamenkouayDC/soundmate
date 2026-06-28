@@ -103,6 +103,14 @@ Header: `Authorization: Bearer <access>`
 
 `GET /api/v1/health/` → `{"status":"ok",...}`
 
+### Продакшен (team17)
+
+```
+https://team17.st.ifbest.org/api/v1/
+```
+
+Swagger: https://team17.st.ifbest.org/api/docs/
+
 ---
 
 ## Модели (кратко)

@@ -4,6 +4,8 @@
 **API:** https://team17.st.ifbest.org/api/v1/  
 **Swagger:** https://team17.st.ifbest.org/api/docs/
 
+**Статус:** ✅ задеплоено (gunicorn на порту 80 внутри контейнера)
+
 ---
 
 ## SSH
