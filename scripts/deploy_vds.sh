@@ -39,6 +39,7 @@ source .env
 set +a
 
 .venv/bin/python manage.py migrate --noinput
+.venv/bin/python manage.py seed_demo_profiles 2>/dev/null || true
 .venv/bin/python manage.py collectstatic --noinput 2>/dev/null || true
 
 pkill -f "gunicorn config.wsgi" 2>/dev/null || true

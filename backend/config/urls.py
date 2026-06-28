@@ -14,4 +14,5 @@ urlpatterns = [
     path("api/v1/", include("apps.users.urls")),
     path("api/v1/", include("apps.profiles.urls")),
     path("api/v1/", include("apps.music.urls")),
+    path("api/v1/", include("apps.matching.urls")),
 ]
