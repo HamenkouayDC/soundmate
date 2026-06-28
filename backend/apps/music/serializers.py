@@ -43,4 +43,21 @@ class MusicConnectionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         profile = self.context["request"].user.profile
+        provider = validated_data["provider"]
+
+        existing = MusicConnection.objects.filter(
+            profile=profile,
+            provider=provider,
+        ).first()
+
+        if existing:
+            if existing.is_active:
+                raise serializers.ValidationError(
+                    {"provider": "Этот сервис уже подключён."}
+                )
+            existing.external_user_id = validated_data["external_user_id"]
+            existing.is_active = True
+            existing.save(update_fields=["external_user_id", "is_active"])
+            return existing
+
         return MusicConnection.objects.create(profile=profile, **validated_data)
