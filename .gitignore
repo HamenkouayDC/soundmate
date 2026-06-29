@@ -41,6 +41,7 @@ node_modules/
 # ========================
 .docker/
 pgdata/
+backend/data/
 
 # ========================
 # IDE и редакторы
@@ -64,6 +65,7 @@ secrets/
 config/local.py
 .env*
 !.env.example
+!.env.production.example
 
 # ========================
 # Логи и базы данных

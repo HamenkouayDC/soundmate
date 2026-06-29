@@ -9,7 +9,7 @@
 | Неделя | Статус | Содержание |
 |--------|--------|------------|
 | Week 1 | ✅ | Каркас, модели, auth API |
-| Week 2 | ✅ | CRUD профиля, music connections (stub) |
+| Week 2 | ✅ | CRUD профиля, music connections, **матчинг Faiss** |
 
 **Репозиторий:** https://github.com/HamenkouayDC/soundmate
 
@@ -90,8 +90,33 @@ Header: `Authorization: Bearer <access>`
 ```
 Провайдеры: `spotify`, `lastfm`, `soundcloud`, `yandex`
 
-**Отключить** — `DELETE /api/v1/music/connections/<uuid>/`  
-(мягкое отключение: `is_active=false`)
+**Отключить** — `DELETE /api/v1/music/connections/<uuid>/`
+
+### Матчинг (Week 2 demo)
+
+**Лента по совместимости** — `GET /api/v1/matching/feed/`  
+Header: `Authorization: Bearer <access>`
+
+Ответ:
+```json
+{
+  "results": [
+    {
+      "profile": { "display_name": "...", "bio": "..." },
+      "compatibility_score": 87.5,
+      "shared_genres": ["rock", "metal"],
+      "top_genres": ["rock", "punk"]
+    }
+  ]
+}
+```
+
+Перед демо на сервере:
+```bash
+python manage.py seed_demo_profiles
+```
+
+Демо-логин: `demo.rock@soundmate.local` / `demopass123`
 
 Полный OAuth Spotify/Яндекс — позже.
 
@@ -102,6 +127,14 @@ Header: `Authorization: Bearer <access>`
 ### Healthcheck
 
 `GET /api/v1/health/` → `{"status":"ok",...}`
+
+### Продакшен (team17)
+
+```
+https://team17.st.ifbest.org/api/v1/
+```
+
+Swagger: https://team17.st.ifbest.org/api/docs/
 
 ---
 
