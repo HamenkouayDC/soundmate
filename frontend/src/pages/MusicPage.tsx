@@ -75,7 +75,7 @@ export function MusicPage() {
   const navigate = useNavigate()
 
   const [connections, setConnections] = useState<MusicConnection[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
   const [processingProvider, setProcessingProvider] =
     useState<MusicProvider | null>(null)
   const [error, setError] = useState('')
@@ -118,28 +118,28 @@ export function MusicPage() {
     }
   }
 
-  async function loadConnections() {
-    try {
-      setIsLoading(true)
-      setError('')
-
-      const loadedConnections = await executeWithAuth((token) =>
-        getMusicConnections(token),
-      )
-
-      setConnections(loadedConnections)
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError('Не удалось загрузить музыкальные подключения')
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   useEffect(() => {
+    async function loadConnections() {
+      try {
+        setIsInitialLoading(true)
+        setError('')
+
+        const loadedConnections = await executeWithAuth((token) =>
+          getMusicConnections(token),
+        )
+
+        setConnections(loadedConnections)
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message)
+        } else {
+          setError('Не удалось загрузить музыкальные подключения')
+        }
+      } finally {
+        setIsInitialLoading(false)
+      }
+    }
+
     loadConnections()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -148,6 +148,24 @@ export function MusicPage() {
     return activeConnections.find(
       (connection) => connection.provider === provider,
     )
+  }
+
+  function showSuccessMessage(message: string) {
+    setSuccessMessage(message)
+
+    window.setTimeout(() => {
+      setSuccessMessage('')
+    }, 2500)
+  }
+
+  function replaceProviderConnection(updatedConnection: MusicConnection) {
+    setConnections((currentConnections) => {
+      const withoutSameProvider = currentConnections.filter(
+        (connection) => connection.provider !== updatedConnection.provider,
+      )
+
+      return [...withoutSameProvider, updatedConnection]
+    })
   }
 
   async function handleConnect(provider: MusicProvider) {
@@ -160,16 +178,19 @@ export function MusicPage() {
       setError('')
       setSuccessMessage('')
 
-      await executeWithAuth((token) =>
+      const createdConnection = await executeWithAuth((token) =>
         createMusicConnection(token, {
           provider,
           external_user_id: getProviderMockExternalId(provider),
         }),
       )
 
-      await loadConnections()
+      replaceProviderConnection({
+        ...createdConnection,
+        is_active: true,
+      })
 
-      setSuccessMessage('Музыкальный сервис подключён через backend stub.')
+      showSuccessMessage('Музыкальный сервис подключён.')
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)
@@ -208,7 +229,7 @@ export function MusicPage() {
         ),
       )
 
-      setSuccessMessage('Музыкальный сервис отключён.')
+      showSuccessMessage('Музыкальный сервис отключён.')
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)
@@ -229,24 +250,24 @@ export function MusicPage() {
 
         <div className="pointer-events-none absolute left-0 top-52 h-44 w-full bg-[linear-gradient(90deg,transparent,rgba(217,35,255,0.14),transparent)] blur-2xl" />
 
+        {successMessage && (
+          <div className="pointer-events-none fixed left-1/2 top-4 z-50 w-[calc(100%-32px)] max-w-md -translate-x-1/2 rounded-2xl border border-green-300 bg-green-100 px-5 py-3 text-center text-sm font-semibold text-green-800 shadow-xl backdrop-blur-xl">
+            {successMessage}
+          </div>
+        )}
+
+        {error && (
+          <div className="fixed left-1/2 top-4 z-50 w-[calc(100%-32px)] max-w-xl -translate-x-1/2 rounded-2xl border border-red-300 bg-red-100 px-5 py-3 text-center text-sm font-semibold text-red-800 shadow-xl backdrop-blur-xl">
+            {error}
+          </div>
+        )}
+
         <div className="relative z-10 mx-auto max-w-6xl">
           <PageHeader
             label="Music Passport"
             title="Подключи музыкальные сервисы"
             description="Здесь пользователь сможет связать свои музыкальные профили с SoundMate. Сейчас backend даёт stub-подключения без настоящего OAuth."
           />
-
-          {successMessage && (
-            <p className="mb-6 inline-flex rounded-2xl border border-green-300 bg-green-100 px-5 py-3 text-sm font-semibold text-green-800">
-              {successMessage}
-            </p>
-          )}
-
-          {error && (
-            <p className="mb-6 inline-flex rounded-2xl border border-red-300 bg-red-100 px-5 py-3 text-sm font-semibold text-red-800">
-              {error}
-            </p>
-          )}
 
           <div className="grid gap-8 lg:grid-cols-[340px_1fr]">
             <aside className="rounded-[34px] border border-white/60 bg-white/75 p-8 shadow-[0_25px_80px_rgba(80,0,120,0.14)] backdrop-blur-xl">
@@ -286,7 +307,7 @@ export function MusicPage() {
             </aside>
 
             <div className="space-y-5">
-              {isLoading ? (
+              {isInitialLoading ? (
                 <div className="rounded-[34px] border border-white/60 bg-white/75 p-8 text-center shadow-[0_25px_80px_rgba(80,0,120,0.14)] backdrop-blur-xl">
                   <p className="font-semibold text-[#100516]">
                     Загружаем музыкальные подключения...
