@@ -5,6 +5,27 @@ from rest_framework.response import Response
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
+def api_root(request):
+    return Response(
+        {
+            "service": "soundmate-api",
+            "version": "0.1.0",
+            "docs": "/api/docs/",
+            "health": "/api/v1/health/",
+            "endpoints": {
+                "auth_register": "/api/v1/auth/register/",
+                "auth_login": "/api/v1/auth/login/",
+                "users_me": "/api/v1/users/me/",
+                "profiles_me": "/api/v1/profiles/me/",
+                "music_connections": "/api/v1/music/connections/",
+                "matching_feed": "/api/v1/matching/feed/",
+            },
+        }
+    )
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
 def health(request):
     return Response(
         {
