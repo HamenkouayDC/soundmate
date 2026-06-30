@@ -12,8 +12,10 @@ class Profile(models.Model):
         related_name="profile",
     )
     display_name = models.CharField(max_length=100)
+    city = models.CharField(max_length=100, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     bio = models.TextField(blank=True)
+    avatar = models.ImageField(upload_to="avatars/", blank=True)
     avatar_url = models.URLField(blank=True)
     preview_track_url = models.URLField(
         blank=True,
