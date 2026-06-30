@@ -83,6 +83,13 @@ python spotify_client.py
 | `genre_categories.py` | 20 фиксированных категорий жанров + маппинг |
 | `build_embedding.py` | Сборка итогового вектора длины 25, оба режима данных |
 | `main.py` | Текущий рабочий пайплайн: Last.fm -> эмбеддинг |
+| `pipeline.py` | Пайплайн Last.fm → embedding + mood + артисты для БД |
+| `mood_profile.py` | Построение mood_profile из аудио-части вектора |
+| `faiss_search.py` | Faiss nearest-neighbor поиск |
+| `generate_dataset.py` | Синтетический датасет для демо |
+| `demo.py` | Терминальное демо Faiss + скоринг |
+| `ML_STATUS.md` | Итоговый статус ML и интеграции с backend |
+| `tests/test_embedding.py` | Unit-тесты (`python -m unittest discover -s tests -v`) |
 
 ## Решённые вопросы по сравнению с черновым обсуждением
 

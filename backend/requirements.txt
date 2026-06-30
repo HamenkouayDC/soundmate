@@ -8,3 +8,6 @@ django-cors-headers>=4.3
 gunicorn>=22.0
 faiss-cpu>=1.8
 numpy>=1.26
+Pillow>=10.0
+spotipy>=2.23
+requests>=2.31

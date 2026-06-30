@@ -1,8 +1,11 @@
 import json
+from datetime import date
 from pathlib import Path
 
 from django.core.management.base import BaseCommand
 
+from apps.music.embedding_service import rebuild_profile_mood_from_embedding
+from apps.music.models import MusicProvider, MusicTaste
 from apps.profiles.models import Profile
 from apps.users.models import User
 
@@ -41,8 +44,27 @@ class Command(BaseCommand):
             )
             profile.display_name = item["display_name"]
             profile.bio = item.get("bio", "")
+            profile.city = item.get("city", "")
+            birth_date_raw = item.get("birth_date")
+            if birth_date_raw:
+                profile.birth_date = date.fromisoformat(birth_date_raw)
             profile.music_embedding = item["music_embedding"]
+            profile.mood_profile = item.get("mood_profile")
             profile.save()
+            if not profile.mood_profile:
+                rebuild_profile_mood_from_embedding(profile)
+
+            for index, artist in enumerate(item.get("artists", []), start=1):
+                artist_name = artist["name"] if isinstance(artist, dict) else str(artist)
+                MusicTaste.objects.update_or_create(
+                    profile=profile,
+                    source=MusicProvider.LASTFM,
+                    external_artist_id=f"demo-{artist_name.lower().replace(' ', '-')}",
+                    defaults={
+                        "artist_name": artist_name,
+                        "weight": max(1.0, 4.0 - index * 0.5),
+                    },
+                )
 
         self.stdout.write(
             self.style.SUCCESS(

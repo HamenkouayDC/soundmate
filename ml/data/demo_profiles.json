@@ -2,7 +2,32 @@
   {
     "email": "demo.rock@soundmate.local",
     "display_name": "Аня — рок",
+    "city": "Москва",
+    "birth_date": "1998-03-14",
     "bio": "Классический и альтернативный рок.",
+    "artists": [
+      {
+        "name": "Nirvana",
+        "genres": [
+          "grunge",
+          "rock"
+        ]
+      },
+      {
+        "name": "Arctic Monkeys",
+        "genres": [
+          "indie rock",
+          "rock"
+        ]
+      },
+      {
+        "name": "Кино",
+        "genres": [
+          "русский рок",
+          "post-punk"
+        ]
+      }
+    ],
     "music_embedding": {
       "version": 1,
       "fields": [
@@ -60,6 +85,17 @@
         0.20000000298023224
       ]
     },
+    "mood_profile": {
+      "energy": 0.825,
+      "valence": 0.5,
+      "tempo_norm": 0.67,
+      "danceability": 0.575,
+      "acousticness": 0.09,
+      "tempo": 0.67,
+      "label": "нейтральное",
+      "mood": "нейтральное",
+      "source": "demo"
+    },
     "top_genres": [
       "rock",
       "punk",
@@ -71,6 +107,31 @@
     "email": "demo.metal@soundmate.local",
     "display_name": "Макс — метал",
     "bio": "Heavy и alternative metal.",
+    "artists": [
+      {
+        "name": "Metallica",
+        "genres": [
+          "metal",
+          "thrash metal"
+        ]
+      },
+      {
+        "name": "Slipknot",
+        "genres": [
+          "nu metal",
+          "metal"
+        ]
+      },
+      {
+        "name": "Rammstein",
+        "genres": [
+          "industrial metal",
+          "metal"
+        ]
+      }
+    ],
+    "city": "Санкт-Петербург",
+    "birth_date": "1995-02-02",
     "music_embedding": {
       "version": 1,
       "fields": [
@@ -128,6 +189,17 @@
         0.0
       ]
     },
+    "mood_profile": {
+      "energy": 0.925,
+      "valence": 0.325,
+      "tempo_norm": 0.705,
+      "danceability": 0.425,
+      "acousticness": 0.015,
+      "tempo": 0.705,
+      "label": "агрессивное",
+      "mood": "агрессивное",
+      "source": "demo"
+    },
     "top_genres": [
       "metal"
     ],
@@ -137,6 +209,31 @@
     "email": "demo.pop@soundmate.local",
     "display_name": "Катя — поп",
     "bio": "Поп и инди-поп.",
+    "artists": [
+      {
+        "name": "Dua Lipa",
+        "genres": [
+          "pop",
+          "dance pop"
+        ]
+      },
+      {
+        "name": "Lorde",
+        "genres": [
+          "art pop",
+          "indie pop"
+        ]
+      },
+      {
+        "name": "Zemfira",
+        "genres": [
+          "русский поп",
+          "rock"
+        ]
+      }
+    ],
+    "city": "Казань",
+    "birth_date": "1996-03-03",
     "music_embedding": {
       "version": 1,
       "fields": [
@@ -194,6 +291,17 @@
         0.0
       ]
     },
+    "mood_profile": {
+      "energy": 0.675,
+      "valence": 0.675,
+      "tempo_norm": 0.558,
+      "danceability": 0.75,
+      "acousticness": 0.16,
+      "tempo": 0.558,
+      "label": "энергичное",
+      "mood": "энергичное",
+      "source": "demo"
+    },
     "top_genres": [
       "pop",
       "rock",
@@ -205,6 +313,31 @@
     "email": "demo.hiphop@soundmate.local",
     "display_name": "Денис — хип-хоп",
     "bio": "Русский и западный rap.",
+    "artists": [
+      {
+        "name": "Eminem",
+        "genres": [
+          "hip hop",
+          "rap"
+        ]
+      },
+      {
+        "name": "Oxxxymiron",
+        "genres": [
+          "russian hip hop",
+          "rap"
+        ]
+      },
+      {
+        "name": "Travis Scott",
+        "genres": [
+          "trap",
+          "hip hop"
+        ]
+      }
+    ],
+    "city": "Новосибирск",
+    "birth_date": "1997-04-04",
     "music_embedding": {
       "version": 1,
       "fields": [
@@ -262,6 +395,17 @@
         0.0
       ]
     },
+    "mood_profile": {
+      "energy": 0.775,
+      "valence": 0.375,
+      "tempo_norm": 0.458,
+      "danceability": 0.835,
+      "acousticness": 0.045,
+      "tempo": 0.458,
+      "label": "агрессивное",
+      "mood": "агрессивное",
+      "source": "demo"
+    },
     "top_genres": [
       "hip_hop"
     ],
@@ -271,6 +415,31 @@
     "email": "demo.electronic@soundmate.local",
     "display_name": "Ира — электроника",
     "bio": "House, techno, ambient.",
+    "artists": [
+      {
+        "name": "Daft Punk",
+        "genres": [
+          "electronic",
+          "house"
+        ]
+      },
+      {
+        "name": "Aphex Twin",
+        "genres": [
+          "idm",
+          "electronic"
+        ]
+      },
+      {
+        "name": "Bonobo",
+        "genres": [
+          "downtempo",
+          "electronic"
+        ]
+      }
+    ],
+    "city": "Екатеринбург",
+    "birth_date": "1998-05-05",
     "music_embedding": {
       "version": 1,
       "fields": [
@@ -328,6 +497,17 @@
         0.4000000059604645
       ]
     },
+    "mood_profile": {
+      "energy": 0.575,
+      "valence": 0.475,
+      "tempo_norm": 0.585,
+      "danceability": 0.725,
+      "acousticness": 0.2,
+      "tempo": 0.585,
+      "label": "нейтральное",
+      "mood": "нейтральное",
+      "source": "demo"
+    },
     "top_genres": [
       "electronic",
       "other"
@@ -338,6 +518,31 @@
     "email": "demo.jazz@soundmate.local",
     "display_name": "Олег — джаз",
     "bio": "Smooth jazz и soul.",
+    "artists": [
+      {
+        "name": "Miles Davis",
+        "genres": [
+          "jazz",
+          "cool jazz"
+        ]
+      },
+      {
+        "name": "Norah Jones",
+        "genres": [
+          "jazz",
+          "vocal jazz"
+        ]
+      },
+      {
+        "name": "Jamiroquai",
+        "genres": [
+          "funk",
+          "jazz funk"
+        ]
+      }
+    ],
+    "city": "Краснодар",
+    "birth_date": "1999-06-06",
     "music_embedding": {
       "version": 1,
       "fields": [
@@ -395,6 +600,17 @@
         0.0
       ]
     },
+    "mood_profile": {
+      "energy": 0.375,
+      "valence": 0.575,
+      "tempo_norm": 0.475,
+      "danceability": 0.475,
+      "acousticness": 0.525,
+      "tempo": 0.475,
+      "label": "спокойное",
+      "mood": "спокойное",
+      "source": "demo"
+    },
     "top_genres": [
       "jazz",
       "soul_funk"
@@ -405,6 +621,31 @@
     "email": "demo.indie@soundmate.local",
     "display_name": "Лиза — инди",
     "bio": "Indie rock и dream pop.",
+    "artists": [
+      {
+        "name": "Tame Impala",
+        "genres": [
+          "psychedelic rock",
+          "indie"
+        ]
+      },
+      {
+        "name": "The xx",
+        "genres": [
+          "indie pop",
+          "dream pop"
+        ]
+      },
+      {
+        "name": "Молчат дома",
+        "genres": [
+          "post-punk",
+          "cold wave"
+        ]
+      }
+    ],
+    "city": "Самара",
+    "birth_date": "2000-07-07",
     "music_embedding": {
       "version": 1,
       "fields": [
@@ -462,6 +703,17 @@
         0.20000000298023224
       ]
     },
+    "mood_profile": {
+      "energy": 0.525,
+      "valence": 0.475,
+      "tempo_norm": 0.558,
+      "danceability": 0.525,
+      "acousticness": 0.325,
+      "tempo": 0.558,
+      "label": "нейтральное",
+      "mood": "нейтральное",
+      "source": "demo"
+    },
     "top_genres": [
       "pop",
       "rock",
@@ -473,6 +725,31 @@
     "email": "demo.kpop@soundmate.local",
     "display_name": "Соня — K-pop",
     "bio": "K-pop и dance pop.",
+    "artists": [
+      {
+        "name": "BTS",
+        "genres": [
+          "k-pop",
+          "pop"
+        ]
+      },
+      {
+        "name": "BLACKPINK",
+        "genres": [
+          "k-pop",
+          "dance pop"
+        ]
+      },
+      {
+        "name": "TWICE",
+        "genres": [
+          "k-pop",
+          "bubblegum pop"
+        ]
+      }
+    ],
+    "city": "Воронеж",
+    "birth_date": "2001-08-08",
     "music_embedding": {
       "version": 1,
       "fields": [
@@ -530,6 +807,17 @@
         0.0
       ]
     },
+    "mood_profile": {
+      "energy": 0.825,
+      "valence": 0.775,
+      "tempo_norm": 0.637,
+      "danceability": 0.89,
+      "acousticness": 0.045,
+      "tempo": 0.637,
+      "label": "энергичное",
+      "mood": "энергичное",
+      "source": "demo"
+    },
     "top_genres": [
       "pop",
       "k_pop"
@@ -540,6 +828,31 @@
     "email": "demo.folk@soundmate.local",
     "display_name": "Пётр — фолк",
     "bio": "Акустика и авторская песня.",
+    "artists": [
+      {
+        "name": "Simon & Garfunkel",
+        "genres": [
+          "folk",
+          "folk rock"
+        ]
+      },
+      {
+        "name": "Мельница",
+        "genres": [
+          "folk rock",
+          "celtic"
+        ]
+      },
+      {
+        "name": "Nick Drake",
+        "genres": [
+          "folk",
+          "singer-songwriter"
+        ]
+      }
+    ],
+    "city": "Ростов-на-Дону",
+    "birth_date": "2002-09-09",
     "music_embedding": {
       "version": 1,
       "fields": [
@@ -597,6 +910,17 @@
         0.3333333432674408
       ]
     },
+    "mood_profile": {
+      "energy": 0.325,
+      "valence": 0.425,
+      "tempo_norm": 0.442,
+      "danceability": 0.375,
+      "acousticness": 0.825,
+      "tempo": 0.442,
+      "label": "меланхоличное",
+      "mood": "меланхоличное",
+      "source": "demo"
+    },
     "top_genres": [
       "rock",
       "folk",
@@ -608,6 +932,31 @@
     "email": "demo.rnb@soundmate.local",
     "display_name": "Мила — R&B",
     "bio": "Современный R&B и neo soul.",
+    "artists": [
+      {
+        "name": "SZA",
+        "genres": [
+          "rnb",
+          "neo soul"
+        ]
+      },
+      {
+        "name": "Frank Ocean",
+        "genres": [
+          "rnb",
+          "alternative rnb"
+        ]
+      },
+      {
+        "name": "The Weeknd",
+        "genres": [
+          "rnb",
+          "pop"
+        ]
+      }
+    ],
+    "city": "Нижний Новгород",
+    "birth_date": "2003-10-10",
     "music_embedding": {
       "version": 1,
       "fields": [
@@ -665,6 +1014,17 @@
         0.0
       ]
     },
+    "mood_profile": {
+      "energy": 0.525,
+      "valence": 0.375,
+      "tempo_norm": 0.507,
+      "danceability": 0.675,
+      "acousticness": 0.175,
+      "tempo": 0.507,
+      "label": "задумчивое",
+      "mood": "задумчивое",
+      "source": "demo"
+    },
     "top_genres": [
       "rnb",
       "pop",
@@ -676,6 +1036,31 @@
     "email": "demo.latin@soundmate.local",
     "display_name": "Карлос — латино",
     "bio": "Reggaeton и latin pop.",
+    "artists": [
+      {
+        "name": "Bad Bunny",
+        "genres": [
+          "reggaeton",
+          "latin"
+        ]
+      },
+      {
+        "name": "Shakira",
+        "genres": [
+          "latin pop",
+          "pop"
+        ]
+      },
+      {
+        "name": "Rosalía",
+        "genres": [
+          "latin",
+          "flamenco"
+        ]
+      }
+    ],
+    "city": "Тюмень",
+    "birth_date": "1994-11-11",
     "music_embedding": {
       "version": 1,
       "fields": [
@@ -733,6 +1118,17 @@
         0.20000000298023224
       ]
     },
+    "mood_profile": {
+      "energy": 0.775,
+      "valence": 0.675,
+      "tempo_norm": 0.49,
+      "danceability": 0.875,
+      "acousticness": 0.11,
+      "tempo": 0.49,
+      "label": "энергичное",
+      "mood": "энергичное",
+      "source": "demo"
+    },
     "top_genres": [
       "latin",
       "pop",
@@ -744,6 +1140,31 @@
     "email": "demo.ambient@soundmate.local",
     "display_name": "Ника — ambient",
     "bio": "Ambient и lo-fi.",
+    "artists": [
+      {
+        "name": "Brian Eno",
+        "genres": [
+          "ambient",
+          "electronic"
+        ]
+      },
+      {
+        "name": "Tycho",
+        "genres": [
+          "ambient",
+          "chillwave"
+        ]
+      },
+      {
+        "name": "Nujabes",
+        "genres": [
+          "jazz hop",
+          "lo-fi"
+        ]
+      }
+    ],
+    "city": "Уфа",
+    "birth_date": "1995-12-12",
     "music_embedding": {
       "version": 1,
       "fields": [
@@ -801,6 +1222,17 @@
         0.20000000298023224
       ]
     },
+    "mood_profile": {
+      "energy": 0.275,
+      "valence": 0.525,
+      "tempo_norm": 0.42,
+      "danceability": 0.425,
+      "acousticness": 0.575,
+      "tempo": 0.42,
+      "label": "нейтральное",
+      "mood": "нейтральное",
+      "source": "demo"
+    },
     "top_genres": [
       "ambient",
       "electronic",
@@ -811,7 +1243,32 @@
   {
     "email": "demo.lastfm@soundmate.local",
     "display_name": "Вика — Last.fm only",
+    "city": "Москва",
+    "birth_date": "1998-03-14",
     "bio": "Демо без Spotify: только жанры из Last.fm.",
+    "artists": [
+      {
+        "name": "Nirvana",
+        "genres": [
+          "grunge",
+          "rock"
+        ]
+      },
+      {
+        "name": "Arctic Monkeys",
+        "genres": [
+          "indie rock",
+          "rock"
+        ]
+      },
+      {
+        "name": "Кино",
+        "genres": [
+          "русский рок",
+          "post-punk"
+        ]
+      }
+    ],
     "music_embedding": {
       "version": 1,
       "fields": [
@@ -868,6 +1325,17 @@
         0.20000000298023224,
         0.20000000298023224
       ]
+    },
+    "mood_profile": {
+      "energy": null,
+      "valence": null,
+      "tempo_norm": null,
+      "danceability": null,
+      "acousticness": null,
+      "tempo": null,
+      "label": "по жанрам",
+      "mood": "по жанрам",
+      "source": "lastfm"
     },
     "top_genres": [
       "rock",

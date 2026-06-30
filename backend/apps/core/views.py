@@ -17,7 +17,13 @@ def api_root(request):
                 "auth_login": "/api/v1/auth/login/",
                 "users_me": "/api/v1/users/me/",
                 "profiles_me": "/api/v1/profiles/me/",
+                "profiles_avatar": "/api/v1/profiles/me/avatar/",
+                "music_passport": "/api/v1/music/passport/",
+                "music_passport_rebuild": "/api/v1/music/passport/rebuild/",
                 "music_connections": "/api/v1/music/connections/",
+                "feed": "/api/v1/feed/",
+                "feed_actions": "/api/v1/feed/actions/",
+                "matches": "/api/v1/matches/",
                 "matching_feed": "/api/v1/matching/feed/",
             },
         }

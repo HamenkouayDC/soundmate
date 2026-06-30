@@ -27,12 +27,7 @@ SCOPE = "user-top-read"
 
 
 def get_spotify_client() -> spotipy.Spotify:
-    """
-    Создаёт авторизованный клиент Spotify.
-    При первом запуске откроется браузер — нужно залогиниться и разрешить доступ.
-    После этого spotipy сохранит токен в файле .cache и при следующих запусках
-    будет использовать его без повторного логина (пока токен не истечёт).
-    """
+    """OAuth через spotipy (локальный .cache) — для разработки и тестов ML."""
     auth_manager = SpotifyOAuth(
         client_id=os.environ["SPOTIFY_CLIENT_ID"],
         client_secret=os.environ["SPOTIFY_CLIENT_SECRET"],
@@ -41,6 +36,11 @@ def get_spotify_client() -> spotipy.Spotify:
         open_browser=True,
     )
     return spotipy.Spotify(auth_manager=auth_manager)
+
+
+def get_spotify_client_from_token(access_token: str) -> spotipy.Spotify:
+    """Клиент из access_token пользователя (из MusicConnection.tokens_encrypted)."""
+    return spotipy.Spotify(auth=access_token)
 
 
 def fetch_top_artists(sp: spotipy.Spotify, limit: int = 20) -> list[dict]:

@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 
 from build_embedding import build_user_embedding
+from mood_profile import build_mood_profile
 from vector_utils import embedding_to_storage, top_genre_labels
 
 DATA_PATH = Path(__file__).parent / "data" / "demo_profiles.json"
@@ -19,6 +20,8 @@ DEMO_PERSONAS = [
     {
         "email": "demo.rock@soundmate.local",
         "display_name": "Аня — рок",
+        "city": "Москва",
+        "birth_date": "1998-03-14",
         "bio": "Классический и альтернативный рок.",
         "artists": [
             {"name": "Nirvana", "genres": ["grunge", "rock"]},
@@ -187,22 +190,48 @@ DEMO_PERSONAS = [
 ]
 
 
-def build_persona(persona: dict, lastfm_only: bool = False) -> dict:
+def build_persona(persona: dict, index: int = 0, lastfm_only: bool = False) -> dict:
     artists = persona["artists"]
     audio = None if lastfm_only else persona.get("audio")
     vector = build_user_embedding(artists, audio)
     storage = embedding_to_storage(vector)
+
+    cities = [
+        "Москва",
+        "Санкт-Петербург",
+        "Казань",
+        "Новосибирск",
+        "Екатеринбург",
+        "Краснодар",
+        "Самара",
+        "Воронеж",
+        "Ростов-на-Дону",
+        "Нижний Новгород",
+        "Тюмень",
+        "Уфа",
+    ]
+    birth_year = 1994 + (index % 10)
+    birth_month = (index % 12) + 1
+    birth_day = (index % 27) + 1
+
     return {
-        **{k: v for k, v in persona.items() if k not in ("artists", "audio")},
+        **{k: v for k, v in persona.items() if k != "audio"},
+        "city": persona.get("city", cities[index % len(cities)]),
+        "birth_date": persona.get(
+            "birth_date",
+            f"{birth_year}-{birth_month:02d}-{birth_day:02d}",
+        ),
+        "artists": artists,
         "music_embedding": storage,
+        "mood_profile": build_mood_profile(vector, source="demo" if not lastfm_only else "lastfm"),
         "top_genres": top_genre_labels(vector),
         "mode": "lastfm_only" if lastfm_only else "full",
     }
 
 
 def main() -> None:
-    profiles = [build_persona(p, lastfm_only=False) for p in DEMO_PERSONAS]
-    profiles.append(build_persona(DEMO_PERSONAS[0], lastfm_only=True))
+    profiles = [build_persona(p, index=index) for index, p in enumerate(DEMO_PERSONAS)]
+    profiles.append(build_persona(DEMO_PERSONAS[0], index=len(DEMO_PERSONAS), lastfm_only=True))
     profiles[-1]["email"] = "demo.lastfm@soundmate.local"
     profiles[-1]["display_name"] = "Вика — Last.fm only"
     profiles[-1]["bio"] = "Демо без Spotify: только жанры из Last.fm."

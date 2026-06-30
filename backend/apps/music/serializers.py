@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.music.embedding_service import rebuild_profile_from_connections
 from apps.music.models import MusicConnection, MusicProvider
 
 
@@ -58,6 +59,9 @@ class MusicConnectionSerializer(serializers.ModelSerializer):
             existing.external_user_id = validated_data["external_user_id"]
             existing.is_active = True
             existing.save(update_fields=["external_user_id", "is_active"])
+            rebuild_profile_from_connections(profile)
             return existing
 
-        return MusicConnection.objects.create(profile=profile, **validated_data)
+        connection = MusicConnection.objects.create(profile=profile, **validated_data)
+        rebuild_profile_from_connections(profile)
+        return connection

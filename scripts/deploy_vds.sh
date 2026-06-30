@@ -18,7 +18,7 @@ else
 fi
 
 cd backend
-mkdir -p data
+mkdir -p data media
 
 if [ ! -d .venv ]; then
   python3 -m venv .venv

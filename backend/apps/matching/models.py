@@ -81,3 +81,61 @@ class Match(models.Model):
 
     def __str__(self):
         return f"{self.user_a} ↔ {self.user_b}"
+
+
+class FeedActionType(models.TextChoices):
+    LIKE = "like", "Лайк"
+    SKIP = "skip", "Пропуск"
+
+
+class FeedAction(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="feed_actions_sent",
+    )
+    target = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="feed_actions_received",
+    )
+    action = models.CharField(max_length=10, choices=FeedActionType.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "действие в ленте"
+        verbose_name_plural = "действия в ленте"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["actor", "target"],
+                name="unique_feed_action_pair",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.actor} {self.action} {self.target}"
+
+
+class Message(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    match = models.ForeignKey(
+        Match,
+        on_delete=models.CASCADE,
+        related_name="messages",
+    )
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="sent_messages",
+    )
+    text = models.TextField(max_length=2000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "сообщение"
+        verbose_name_plural = "сообщения"
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.sender}: {self.text[:40]}"

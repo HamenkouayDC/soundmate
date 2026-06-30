@@ -1,62 +1,72 @@
 """
 main.py
 
-Полный прогон задачи 1 + задачи 3 целиком, в текущем режиме недели 1:
-только Last.fm (Spotify Web API временно недоступен — требует Premium-
-аккаунт у владельца приложения, см. README и комментарий в build_embedding.py).
-
-Получаем топ-артистов из Last.fm -> докручиваем теги -> строим эмбеддинг
-(аудио-часть будет "нет данных", жанровая часть — полноценная).
-
-Запуск:
-    source venv/bin/activate   (или venv\\Scripts\\activate на Windows)
-    python main.py
+Прогон ML-пайплайна:
+  python main.py              # Last.fm (нужен LASTFM_* в .env)
+  python main.py --spotify    # Spotify + audio features (нужен SPOTIFY_* в .env)
+  python main.py --soundcloud USERNAME
 """
 
-from lastfm_client import fetch_top_artists, artists_with_genres
-from build_embedding import build_user_embedding, describe_embedding
+from __future__ import annotations
+
+import argparse
 import os
+import sys
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
-def main() -> None:
+def main_lastfm() -> None:
+    from lastfm_client import artists_with_genres, fetch_top_artists
+    from build_embedding import describe_embedding
+    from pipeline import build_profile_from_lastfm
+
     username = os.environ["LASTFM_TEST_USERNAME"]
-    print(f"Запрашиваем топ-артистов Last.fm для пользователя {username}...\n")
-
-    artists = fetch_top_artists(username)
-    print(f"Получено артистов: {len(artists)}")
-
-    print("Докручиваем теги по каждому артисту (это медленно — по 1 запросу на артиста)...")
-    artists_full = artists_with_genres(artists)
-
-    embedding = build_user_embedding(artists_full)  # audio_features не передаём
-
-    print("\n=== Музыкальный эмбеддинг пользователя (режим: только Last.fm) ===")
-    describe_embedding(embedding)
-    print(
-        "\nПримечание: первые 5 полей помечены как 'нет данных' — это аудио-"
-        "характеристики, которые в полной версии берутся из Spotify audio "
-        "features. Они появятся, когда у владельца Spotify-приложения будет "
-        "Premium-аккаунт (см. README)."
-    )
+    print(f"Last.fm → embedding для {username}\n")
+    result = build_profile_from_lastfm(username)
+    describe_embedding(__import__("vector_utils").parse_embedding(result.embedding))
+    print(f"\nMood: {result.mood_profile['label']}")
+    print(f"Топ-жанры: {', '.join(result.top_genres)}")
 
 
-# --- Полный режим (Spotify + Last.fm), для справки, когда появится Premium ---
-#
-# from spotify_client import (
-#     get_spotify_client, fetch_top_artists as spotify_top_artists,
-#     fetch_top_tracks, fetch_audio_features,
-# )
-#
-# def main_full():
-#     sp = get_spotify_client()
-#     artists = spotify_top_artists(sp)
-#     tracks = fetch_top_tracks(sp)
-#     features = fetch_audio_features(sp, [t["id"] for t in tracks])
-#     embedding = build_user_embedding(artists, features)
-#     describe_embedding(embedding)
+def main_spotify() -> None:
+    from spotify_client import get_spotify_client
+    from build_embedding import describe_embedding
+    from pipeline import build_profile_from_spotify
+
+    print("Spotify → полный embedding (жанры + audio features)\n")
+    sp = get_spotify_client()
+    result = build_profile_from_spotify(sp)
+    describe_embedding(__import__("vector_utils").parse_embedding(result.embedding))
+    print(f"\nMood: {result.mood_profile['label']}")
+    print(f"Топ-жанры: {', '.join(result.top_genres)}")
+
+
+def main_soundcloud(username: str) -> None:
+    from build_embedding import describe_embedding
+    from pipeline import build_profile_from_soundcloud
+
+    print(f"SoundCloud → embedding для {username}\n")
+    result = build_profile_from_soundcloud(username)
+    describe_embedding(__import__("vector_utils").parse_embedding(result.embedding))
+    print(f"\nMood: {result.mood_profile['label']}")
+    print(f"Топ-жанры: {', '.join(result.top_genres)}")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Soundmate ML pipeline")
+    parser.add_argument("--spotify", action="store_true", help="Полный пайплайн через Spotify")
+    parser.add_argument("--soundcloud", metavar="USERNAME", help="Профиль SoundCloud по username")
+    args = parser.parse_args()
+
+    if args.spotify:
+        main_spotify()
+    elif args.soundcloud:
+        main_soundcloud(args.soundcloud)
+    else:
+        main_lastfm()
 
 
 if __name__ == "__main__":

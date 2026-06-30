@@ -1,102 +1,113 @@
-import json
-from pathlib import Path
-
-import faiss
-import numpy as np
-from rest_framework import generics
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.matching.embedding_utils import (
-    compatibility_score,
-    parse_embedding,
-    search_vector,
-    shared_top_genres,
-    top_genre_labels,
-)
-from apps.matching.serializers import FeedProfileSerializer
-from apps.profiles.models import Profile
+from apps.matching.models import FeedAction, FeedActionType, Match, MatchStatus, Message
+from apps.matching.serializers import FeedActionSerializer, MessageCreateSerializer, MessageSerializer
+from apps.matching.services import build_feed_results, build_match_item, create_match_if_mutual
+from apps.users.models import User
 
 
-class MatchingFeedView(generics.GenericAPIView):
-    """
-    Лента кандидатов по музыкальной совместимости (Faiss L2 + cosine score).
-    Для демо: сначала `python manage.py seed_demo_profiles`.
-    """
-
+class FeedView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = FeedProfileSerializer
 
     def get(self, request):
-        my_profile = request.user.profile
-        query_vector = parse_embedding(my_profile.music_embedding)
+        results = build_feed_results(request.user, request)
+        return Response({"results": results})
 
-        if query_vector is None:
+
+class FeedActionView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = FeedActionSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        target = get_object_or_404(User, id=serializer.validated_data["target_user_id"])
+        if target == request.user:
             return Response(
-                {
-                    "detail": (
-                        "У вашего профиля нет music_embedding. "
-                        "Запустите seed_demo_profiles или подключите Last.fm."
-                    ),
-                    "results": [],
-                },
-                status=200,
+                {"detail": "Нельзя выполнить действие над собой."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-        candidates = (
-            Profile.objects.exclude(user=request.user)
-            .exclude(music_embedding__isnull=True)
-            .select_related("user")
+        action = serializer.validated_data["action"]
+        FeedAction.objects.update_or_create(
+            actor=request.user,
+            target=target,
+            defaults={"action": action},
         )
 
-        indexed = []
-        for profile in candidates:
-            vector = parse_embedding(profile.music_embedding)
-            if vector is not None:
-                indexed.append((profile, vector))
+        is_match = False
+        match_id = None
+        if action == FeedActionType.LIKE:
+            match = create_match_if_mutual(request.user, target)
+            if match:
+                is_match = True
+                match_id = str(match.id)
 
-        if not indexed:
-            return Response({"results": []})
-
-        dimension = search_vector(indexed[0][1]).shape[0]
-        matrix = np.vstack([search_vector(vector) for _, vector in indexed]).astype(np.float32)
-        faiss.normalize_L2(matrix)
-
-        index = faiss.IndexFlatL2(dimension)
-        index.add(matrix)
-
-        query = search_vector(query_vector).astype(np.float32).reshape(1, -1)
-        faiss.normalize_L2(query)
-
-        k = min(10, len(indexed))
-        distances, indices = index.search(query, k)
-
-        results = []
-        for distance, idx in zip(distances[0], indices[0]):
-            if idx < 0:
-                continue
-            profile, vector = indexed[int(idx)]
-            results.append(
-                {
-                    "profile": profile,
-                    "compatibility_score": compatibility_score(query_vector, vector),
-                    "shared_genres": shared_top_genres(query_vector, vector),
-                    "top_genres": top_genre_labels(vector),
-                    "_distance": float(distance),
-                }
-            )
-
-        results.sort(key=lambda item: item["compatibility_score"], reverse=True)
-        serializer = self.get_serializer(
-            [
-                {
-                    "profile": item["profile"],
-                    "compatibility_score": item["compatibility_score"],
-                    "shared_genres": item["shared_genres"],
-                    "top_genres": item["top_genres"],
-                }
-                for item in results
-            ],
-            many=True,
+        return Response(
+            {
+                "action": action,
+                "is_match": is_match,
+                "match_id": match_id,
+            },
+            status=status.HTTP_200_OK,
         )
+
+
+class MatchesListView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        matches = Match.objects.filter(
+            status=MatchStatus.ACTIVE,
+        ).filter(
+            Q(user_a=request.user) | Q(user_b=request.user),
+        ).distinct()
+
+        results = [build_match_item(match, request.user, request) for match in matches]
+        results.sort(
+            key=lambda item: item["last_message"]["created_at"] if item["last_message"] else "",
+            reverse=True,
+        )
+        return Response({"results": results})
+
+
+class MatchMessageListCreateView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get_match(self, request, match_id):
+        match = get_object_or_404(Match, id=match_id, status=MatchStatus.ACTIVE)
+        if request.user.id not in (match.user_a_id, match.user_b_id):
+            return None
+        return match
+
+    def get(self, request, match_id):
+        match = self.get_match(request, match_id)
+        if match is None:
+            return Response({"detail": "Матч не найден."}, status=status.HTTP_404_NOT_FOUND)
+
+        messages = match.messages.select_related("sender").all()
+        serializer = MessageSerializer(messages, many=True)
         return Response({"results": serializer.data})
+
+    def post(self, request, match_id):
+        match = self.get_match(request, match_id)
+        if match is None:
+            return Response({"detail": "Матч не найден."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = MessageCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        message = Message.objects.create(
+            match=match,
+            sender=request.user,
+            text=serializer.validated_data["text"],
+        )
+        return Response(
+            MessageSerializer(message).data,
+            status=status.HTTP_201_CREATED,
+        )

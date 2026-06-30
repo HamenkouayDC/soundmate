@@ -1,10 +1,21 @@
 from rest_framework import serializers
 
-from apps.profiles.serializers import ProfileSerializer
+from apps.matching.models import FeedActionType, Message
 
 
-class FeedProfileSerializer(serializers.Serializer):
-    profile = ProfileSerializer(read_only=True)
-    compatibility_score = serializers.FloatField()
-    shared_genres = serializers.ListField(child=serializers.CharField())
-    top_genres = serializers.ListField(child=serializers.CharField())
+class FeedActionSerializer(serializers.Serializer):
+    target_user_id = serializers.UUIDField()
+    action = serializers.ChoiceField(choices=FeedActionType.choices)
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    sender_id = serializers.UUIDField(source="sender.id", read_only=True)
+
+    class Meta:
+        model = Message
+        fields = ("id", "sender_id", "text", "created_at")
+        read_only_fields = ("id", "sender_id", "created_at")
+
+
+class MessageCreateSerializer(serializers.Serializer):
+    text = serializers.CharField(max_length=2000)
