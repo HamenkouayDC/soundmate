@@ -1,33 +1,36 @@
-import { apiClient } from './apiClient'
+﻿import { apiClient } from './apiClient'
 
 export type MyProfile = {
-  id: string
+  id?: string
   display_name: string
   birth_date: string | null
+  city: string
   bio: string
   avatar_url: string
-  preview_track_url: string
-  updated_at: string
+  preview_track_url?: string
+  updated_at?: string
 }
 
-export type UpdateProfileData = {
+export type UpdateMyProfilePayload = {
   display_name?: string
   birth_date?: string | null
+  city?: string
   bio?: string
-  avatar_url?: string
-  preview_track_url?: string
 }
 
-export function getMyProfile(token: string) {
+export async function getMyProfile(accessToken: string): Promise<MyProfile> {
   return apiClient<MyProfile>('/profiles/me/', {
-    token,
+    token: accessToken,
   })
 }
 
-export function updateMyProfile(token: string, data: UpdateProfileData) {
+export async function updateMyProfile(
+  accessToken: string,
+  payload: UpdateMyProfilePayload,
+): Promise<MyProfile> {
   return apiClient<MyProfile>('/profiles/me/', {
     method: 'PATCH',
-    token,
-    body: data,
+    token: accessToken,
+    body: payload,
   })
 }

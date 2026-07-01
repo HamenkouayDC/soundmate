@@ -9,7 +9,11 @@ import { PageHeader } from '../components/ui/PageHeader'
 import { Tag } from '../components/ui/Tag'
 import { ApiError } from '../shared/api/apiClient'
 import { refreshAccessToken } from '../shared/api/authApi'
-import { updateMyProfile, type MyProfile } from '../shared/api/profileApi'
+import {
+  getMyProfile,
+  updateMyProfile,
+  type MyProfile,
+} from '../shared/api/profileApi'
 import { getCurrentUser, type CurrentUser } from '../shared/api/userApi'
 import {
   clearTokens,
@@ -28,27 +32,13 @@ type ProfileForm = {
   bio: string
 }
 
-function createFormFromUser(currentUser: CurrentUser): ProfileForm {
+function createFormFromProfile(profile: MyProfile): ProfileForm {
   return {
-    displayName: currentUser.profile.display_name || 'Пользователь',
-    city: 'Будет добавлено позже',
-    birthDate: currentUser.profile.birth_date || '',
+    displayName: profile.display_name || 'Пользователь',
+    city: profile.city || '',
+    birthDate: profile.birth_date || '',
     bio:
-      currentUser.profile.bio ||
-      'Расскажи немного о себе, любимой музыке и концертах, на которые хочешь сходить.',
-  }
-}
-
-function createFormFromProfile(
-  currentForm: ProfileForm,
-  updatedProfile: MyProfile,
-): ProfileForm {
-  return {
-    ...currentForm,
-    displayName: updatedProfile.display_name || 'Пользователь',
-    birthDate: updatedProfile.birth_date || '',
-    bio:
-      updatedProfile.bio ||
+      profile.bio ||
       'Расскажи немного о себе, любимой музыке и концертах, на которые хочешь сходить.',
   }
 }
@@ -68,6 +58,32 @@ export function ProfilePage() {
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
+  async function loadUserAndProfileWithToken(token: string) {
+    const currentUser = await getCurrentUser(token)
+    const currentProfile = await getMyProfile(token)
+    const initialForm = createFormFromProfile(currentProfile)
+
+    setUser({
+      ...currentUser,
+      profile: {
+        ...currentUser.profile,
+        display_name: currentProfile.display_name,
+        birth_date: currentProfile.birth_date,
+        bio: currentProfile.bio,
+        avatar_url: currentProfile.avatar_url ?? currentUser.profile.avatar_url,
+        preview_track_url:
+          currentProfile.preview_track_url ??
+          currentUser.profile.preview_track_url ??
+          '',
+        updated_at:
+          currentProfile.updated_at ?? currentUser.profile.updated_at ?? '',
+      },
+    })
+
+    setProfileForm(initialForm)
+    setSavedProfileForm(initialForm)
+  }
+
   useEffect(() => {
     async function loadProfile() {
       const accessToken = getAccessToken()
@@ -78,12 +94,7 @@ export function ProfilePage() {
       }
 
       try {
-        const currentUser = await getCurrentUser(accessToken)
-        const initialForm = createFormFromUser(currentUser)
-
-        setUser(currentUser)
-        setProfileForm(initialForm)
-        setSavedProfileForm(initialForm)
+        await loadUserAndProfileWithToken(accessToken)
       } catch (err) {
         if (err instanceof ApiError && err.status === 401) {
           const refreshToken = getRefreshToken()
@@ -99,12 +110,7 @@ export function ProfilePage() {
 
             saveAccessToken(newTokens.access)
 
-            const currentUser = await getCurrentUser(newTokens.access)
-            const initialForm = createFormFromUser(currentUser)
-
-            setUser(currentUser)
-            setProfileForm(initialForm)
-            setSavedProfileForm(initialForm)
+            await loadUserAndProfileWithToken(newTokens.access)
           } catch {
             clearTokens()
             navigate('/login')
@@ -167,10 +173,15 @@ export function ProfilePage() {
           ...currentUser.profile,
           display_name: updatedProfile.display_name,
           birth_date: updatedProfile.birth_date,
+          city: updatedProfile.city,
           bio: updatedProfile.bio,
-          avatar_url: updatedProfile.avatar_url,
-          preview_track_url: updatedProfile.preview_track_url,
-          updated_at: updatedProfile.updated_at,
+          avatar_url: updatedProfile.avatar_url ?? currentUser.profile.avatar_url,
+          preview_track_url:
+            updatedProfile.preview_track_url ??
+            currentUser.profile.preview_track_url ??
+            '',
+          updated_at:
+            updatedProfile.updated_at ?? currentUser.profile.updated_at ?? '',
         },
       }
     })
@@ -180,6 +191,7 @@ export function ProfilePage() {
     return updateMyProfile(token, {
       display_name: form.displayName.trim(),
       birth_date: form.birthDate || null,
+      city: form.city.trim(),
       bio: form.bio.trim(),
     })
   }
@@ -209,7 +221,7 @@ export function ProfilePage() {
       setSuccessMessage('')
 
       const updatedProfile = await saveProfileWithToken(accessToken, profileForm)
-      const updatedForm = createFormFromProfile(profileForm, updatedProfile)
+      const updatedForm = createFormFromProfile(updatedProfile)
 
       updateUserProfile(updatedProfile)
       setProfileForm(updatedForm)
@@ -235,7 +247,7 @@ export function ProfilePage() {
             newTokens.access,
             profileForm,
           )
-          const updatedForm = createFormFromProfile(profileForm, updatedProfile)
+          const updatedForm = createFormFromProfile(updatedProfile)
 
           updateUserProfile(updatedProfile)
           setProfileForm(updatedForm)
@@ -312,7 +324,7 @@ export function ProfilePage() {
           <PageHeader
             label="Мой профиль"
             title="Настрой, как тебя увидят другие"
-            description="Здесь собрана основная информация о тебе и музыкальные интересы. Имя, дата рождения и описание теперь сохраняются через backend."
+            description="Здесь собрана основная информация о тебе и музыкальные интересы. Имя, город, дата рождения и описание теперь сохраняются через backend."
           />
 
           {successMessage && (
@@ -381,6 +393,16 @@ export function ProfilePage() {
               <div className="mt-6 space-y-3">
                 <div className="rounded-2xl bg-[#f8f0ff]/90 p-4">
                   <p className="text-xs font-bold uppercase tracking-wide text-[#9c20c7]">
+                    Город
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold text-[#100516]">
+                    {profileForm.city || 'Не указан'}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-[#f8f0ff]/90 p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-[#9c20c7]">
                     Дата регистрации
                   </p>
 
@@ -412,8 +434,8 @@ export function ProfilePage() {
                     </h2>
 
                     <p className="mt-2 text-sm text-gray-600">
-                      Имя, дата рождения и описание сохраняются через backend.
-                      Город пока остаётся mock-полем.
+                      Имя, город, дата рождения и описание сохраняются через
+                      backend.
                     </p>
                   </div>
 
@@ -436,6 +458,7 @@ export function ProfilePage() {
                     label="Город"
                     value={profileForm.city}
                     readOnly={!isEditing}
+                    placeholder="Например, Минск"
                     onChange={(event) =>
                       handleChange('city', event.target.value)
                     }
@@ -453,11 +476,6 @@ export function ProfilePage() {
 
                   <Input label="Email" value={user.email} readOnly />
                 </div>
-
-                <p className="mt-3 text-xs text-gray-500">
-                  Поле “Город” пока не отправляется на backend, потому что его
-                  нет в текущем контракте профиля.
-                </p>
 
                 <div className="mt-5">
                   <div className="mb-2 flex items-center justify-between">
@@ -521,8 +539,8 @@ export function ProfilePage() {
                     </h2>
 
                     <p className="mt-2 text-sm text-gray-600">
-                      Сейчас это mock-данные. Следующим шагом подключим экран
-                      музыкальных сервисов через backend.
+                      Сейчас это mock-данные. Следующим шагом подключим music
+                      passport через backend.
                     </p>
                   </div>
 
@@ -574,9 +592,9 @@ export function ProfilePage() {
                     </h2>
 
                     <p className="mt-3 max-w-xl text-sm leading-6 text-white/70">
-                      В ленте будет отображаться короткая карточка: имя, фото,
-                      описание и музыкальные совпадения. После сохранения имя и
-                      описание уже обновляются через backend.
+                      В ленте будет отображаться короткая карточка: имя, город,
+                      фото, описание и музыкальные совпадения. После сохранения
+                      имя, город и описание обновляются через backend.
                     </p>
                   </div>
 
@@ -590,7 +608,7 @@ export function ProfilePage() {
                     </h3>
 
                     <p className="mt-1 text-xs text-[#e8c8f3]">
-                      {mockGenres.slice(0, 2).join(', ')}
+                      {profileForm.city || 'Город не указан'}
                     </p>
 
                     <div className="mt-4 flex flex-wrap gap-2">
