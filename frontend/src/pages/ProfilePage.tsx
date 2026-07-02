@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from 'react'
+﻿import { useEffect, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router'
 
 import { AppHeader } from '../components/layout/AppHeader'
@@ -96,14 +96,9 @@ export function ProfilePage() {
       const passport = await getMusicPassport(token)
 
       setMusicPassport(passport)
-    } catch (passportError) {
+    } catch {
       setMusicPassport(null)
-
-      if (passportError instanceof Error) {
-        setMusicPassportError(passportError.message)
-      } else {
-        setMusicPassportError('Не удалось загрузить Music Passport')
-      }
+      setMusicPassportError('Не удалось загрузить музыкальные предпочтения.')
     } finally {
       setIsMusicPassportLoading(false)
     }
@@ -144,11 +139,7 @@ export function ProfilePage() {
           return
         }
 
-        if (err instanceof Error) {
-          setError(err.message)
-        } else {
-          setError('Не удалось загрузить профиль')
-        }
+        setError('Не удалось загрузить профиль. Попробуй обновить страницу.')
       } finally {
         setIsLoading(false)
       }
@@ -231,7 +222,7 @@ export function ProfilePage() {
 
     if (!profileForm.displayName.trim()) {
       setSuccessMessage('')
-      setError('Имя не может быть пустым')
+      setError('Имя не может быть пустым.')
       return
     }
 
@@ -255,7 +246,7 @@ export function ProfilePage() {
       setProfileForm(updatedForm)
       setSavedProfileForm(updatedForm)
       setIsEditing(false)
-      setSuccessMessage('Изменения профиля сохранены на backend.')
+      setSuccessMessage('Изменения профиля сохранены.')
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         const refreshToken = getRefreshToken()
@@ -281,23 +272,15 @@ export function ProfilePage() {
           setProfileForm(updatedForm)
           setSavedProfileForm(updatedForm)
           setIsEditing(false)
-          setSuccessMessage('Изменения профиля сохранены на backend.')
-        } catch (refreshError) {
-          if (refreshError instanceof Error) {
-            setError(refreshError.message)
-          } else {
-            setError('Не удалось сохранить профиль')
-          }
+          setSuccessMessage('Изменения профиля сохранены.')
+        } catch {
+          setError('Не удалось сохранить профиль. Попробуй ещё раз.')
         }
 
         return
       }
 
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError('Не удалось сохранить профиль')
-      }
+      setError('Не удалось сохранить профиль. Попробуй ещё раз.')
     } finally {
       setIsSaving(false)
     }
@@ -314,13 +297,13 @@ export function ProfilePage() {
 
     if (!file.type.startsWith('image/')) {
       setSuccessMessage('')
-      setError('Можно загрузить только изображение')
+      setError('Можно загрузить только изображение.')
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
       setSuccessMessage('')
-      setError('Размер изображения не должен превышать 5 МБ')
+      setError('Размер изображения не должен превышать 5 МБ.')
       return
     }
 
@@ -343,7 +326,7 @@ export function ProfilePage() {
       updateUserProfile(updatedProfile)
       setProfileForm(updatedForm)
       setSavedProfileForm(updatedForm)
-      setSuccessMessage('Аватар профиля загружен.')
+      setSuccessMessage('Фото профиля загружено.')
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         const refreshToken = getRefreshToken()
@@ -368,23 +351,15 @@ export function ProfilePage() {
           updateUserProfile(updatedProfile)
           setProfileForm(updatedForm)
           setSavedProfileForm(updatedForm)
-          setSuccessMessage('Аватар профиля загружен.')
-        } catch (refreshError) {
-          if (refreshError instanceof Error) {
-            setError(refreshError.message)
-          } else {
-            setError('Не удалось загрузить аватар')
-          }
+          setSuccessMessage('Фото профиля загружено.')
+        } catch {
+          setError('Не удалось загрузить фото. Попробуй другое изображение.')
         }
 
         return
       }
 
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError('Не удалось загрузить аватар')
-      }
+      setError('Не удалось загрузить фото. Попробуй другое изображение.')
     } finally {
       setIsUploadingAvatar(false)
     }
@@ -442,7 +417,7 @@ export function ProfilePage() {
           <PageHeader
             label="Мой профиль"
             title="Настрой, как тебя увидят другие"
-            description="Здесь собрана основная информация, аватар и Music Passport. Данные профиля и музыкальный паспорт загружаются через backend."
+            description="Добавь фото, расскажи о себе и покажи, какая музыка тебе близка."
           />
 
           {successMessage && (
@@ -465,7 +440,7 @@ export function ProfilePage() {
                 </p>
 
                 <span className="rounded-full bg-[#f4d8ff] px-3 py-1 text-xs font-bold text-[#9c20c7]">
-                  backend
+                  Аватар
                 </span>
               </div>
 
@@ -557,9 +532,7 @@ export function ProfilePage() {
                   </p>
 
                   <p className="mt-1 text-sm font-semibold text-[#100516]">
-                    {isEditing
-                      ? 'Редактирование профиля'
-                      : 'Профиль синхронизирован с backend'}
+                    {isEditing ? 'Редактирование анкеты' : 'Анкета активна'}
                   </p>
                 </div>
               </div>
@@ -574,8 +547,8 @@ export function ProfilePage() {
                     </h2>
 
                     <p className="mt-2 text-sm text-gray-600">
-                      Имя, город, дата рождения и описание сохраняются через
-                      backend.
+                      Эти данные помогают другим пользователям лучше понять,
+                      кто ты и что тебе интересно.
                     </p>
                   </div>
 
@@ -679,13 +652,13 @@ export function ProfilePage() {
                     </h2>
 
                     <p className="mt-2 text-sm text-gray-600">
-                      Жанры, исполнители и топ-треки загружаются через backend
-                      endpoint /music/passport/.
+                      Жанры, любимые исполнители и треки, которые лучше всего
+                      отражают твой музыкальный вкус.
                     </p>
                   </div>
 
                   <Button type="button" disabled>
-                    Music Passport
+                    Моя музыка
                   </Button>
                 </div>
 
@@ -697,7 +670,7 @@ export function ProfilePage() {
 
                 {isMusicPassportLoading ? (
                   <div className="rounded-3xl bg-[#f8f0ff]/90 p-5 text-sm font-semibold text-[#100516]">
-                    Загружаем Music Passport...
+                    Загружаем музыкальные предпочтения...
                   </div>
                 ) : (
                   <div className="grid gap-6 xl:grid-cols-3">
@@ -729,7 +702,10 @@ export function ProfilePage() {
                       <div className="flex flex-wrap gap-3">
                         {artists.length > 0 ? (
                           artists.map((artist) => (
-                            <Tag key={`${artist.name}-${artist.source}`} variant="artist">
+                            <Tag
+                              key={`${artist.name}-${artist.source}`}
+                              variant="artist"
+                            >
                               {artist.name}
                             </Tag>
                           ))
@@ -788,7 +764,7 @@ export function ProfilePage() {
                 <div className="grid gap-6 md:grid-cols-[1fr_220px] md:items-center">
                   <div>
                     <p className="mb-2 text-sm font-bold uppercase tracking-[0.25em] text-[#f13bff]">
-                      Preview
+                      Как выглядит анкета
                     </p>
 
                     <h2 className="text-2xl font-black">
@@ -797,8 +773,7 @@ export function ProfilePage() {
 
                     <p className="mt-3 max-w-xl text-sm leading-6 text-white/70">
                       В ленте будет отображаться короткая карточка: имя, город,
-                      фото, описание и музыкальные совпадения. Музыкальные
-                      данные теперь берутся из Music Passport.
+                      фото, описание и музыкальные совпадения.
                     </p>
                   </div>
 
@@ -826,9 +801,7 @@ export function ProfilePage() {
                     <div className="mt-4 flex flex-wrap gap-2">
                       <Tag variant="dark">87% совпадение</Tag>
 
-                      <Tag variant="dark">
-                        {genres[0] || 'Музыка'}
-                      </Tag>
+                      <Tag variant="dark">{genres[0] || 'Музыка'}</Tag>
                     </div>
                   </div>
                 </div>
@@ -840,3 +813,4 @@ export function ProfilePage() {
     </main>
   )
 }
+

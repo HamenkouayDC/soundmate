@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { AppHeader } from '../components/layout/AppHeader'
@@ -26,7 +26,6 @@ type ProviderCard = {
   provider: MusicProvider
   name: string
   description: string
-  note: string
 }
 
 const visibleProviders: MusicProvider[] = ['spotify', 'lastfm']
@@ -35,14 +34,14 @@ const providerCards: ProviderCard[] = [
   {
     provider: 'spotify',
     name: 'Spotify',
-    description: 'Подключение музыкального профиля Spotify.',
-    note: 'OAuth будет позже, сейчас используется backend stub.',
+    description:
+      'Подключи профиль Spotify, чтобы использовать любимых исполнителей и музыкальные предпочтения в анкете.',
   },
   {
     provider: 'lastfm',
     name: 'Last.fm',
-    description: 'История прослушиваний и музыкальные предпочтения.',
-    note: 'Можно показать подключение без настоящей авторизации.',
+    description:
+      'Подключи Last.fm, чтобы учитывать историю прослушиваний и музыкальные интересы.',
   },
 ]
 
@@ -72,8 +71,7 @@ export function MusicPage() {
   const [successMessage, setSuccessMessage] = useState('')
 
   const activeConnections = useMemo(
-    () =>
-      connections.filter((connection) => connection.is_active !== false),
+    () => connections.filter((connection) => connection.is_active !== false),
     [connections],
   )
 
@@ -128,12 +126,8 @@ export function MusicPage() {
         )
 
         setConnections(loadedConnections)
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message)
-        } else {
-          setError('Не удалось загрузить музыкальные подключения')
-        }
+      } catch {
+        setError('Не удалось загрузить музыкальные сервисы.')
       } finally {
         setIsInitialLoading(false)
       }
@@ -190,12 +184,8 @@ export function MusicPage() {
       })
 
       showSuccessMessage('Музыкальный сервис подключён.')
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError('Не удалось подключить музыкальный сервис')
-      }
+    } catch {
+      setError('Не удалось подключить музыкальный сервис.')
     } finally {
       setProcessingProvider(null)
     }
@@ -229,12 +219,8 @@ export function MusicPage() {
       )
 
       showSuccessMessage('Музыкальный сервис отключён.')
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError('Не удалось отключить музыкальный сервис')
-      }
+    } catch {
+      setError('Не удалось отключить музыкальный сервис.')
     } finally {
       setProcessingProvider(null)
     }
@@ -263,9 +249,9 @@ export function MusicPage() {
 
         <div className="relative z-10 mx-auto max-w-6xl">
           <PageHeader
-            label="Music Passport"
+            label="Музыкальные сервисы"
             title="Подключи Spotify или Last.fm"
-            description="Здесь пользователь может связать музыкальный профиль с SoundMate. Сейчас backend даёт stub-подключения без настоящего OAuth."
+            description="Свяжи музыкальные сервисы с SoundMate, чтобы показать свой вкус и получать более точные совпадения."
           />
 
           <div className="grid gap-8 lg:grid-cols-[340px_1fr]">
@@ -280,28 +266,26 @@ export function MusicPage() {
               </h2>
 
               <p className="mt-4 text-sm leading-7 text-gray-600">
-                Для MVP оставлены только Spotify и Last.fm. Эти подключения уже
-                сохраняются через backend, а настоящий OAuth будет добавлен
-                позже.
+                Для SoundMate доступны Spotify и Last.fm. Подключённые сервисы
+                помогают лучше подобрать совпадения по музыкальному вкусу.
               </p>
 
               <div className="mt-8 rounded-3xl bg-[#08050d] p-5 text-white">
-                <p className="text-sm font-black">Что уже работает</p>
+                <p className="text-sm font-black">Зачем это нужно</p>
 
                 <p className="mt-2 text-sm leading-6 text-white/70">
-                  Frontend получает список подключений, создаёт новое
-                  подключение и отключает его через API.
+                  SoundMate сможет лучше понять твои любимые жанры,
+                  исполнителей и общее музыкальное настроение.
                 </p>
               </div>
 
               <div className="mt-5 rounded-3xl bg-[#f8f0ff]/90 p-5">
                 <p className="text-sm font-black text-[#100516]">
-                  Что будет позже
+                  Управление
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  OAuth, импорт треков, анализ жанров, музыкальный профиль и
-                  рекомендации.
+                  Подключай и отключай сервисы в любой момент.
                 </p>
               </div>
             </aside>
@@ -310,7 +294,7 @@ export function MusicPage() {
               {isInitialLoading ? (
                 <div className="rounded-[34px] border border-white/60 bg-white/75 p-8 text-center shadow-[0_25px_80px_rgba(80,0,120,0.14)] backdrop-blur-xl">
                   <p className="font-semibold text-[#100516]">
-                    Загружаем музыкальные подключения...
+                    Загружаем музыкальные сервисы...
                   </p>
                 </div>
               ) : (
@@ -349,17 +333,6 @@ export function MusicPage() {
                           <p className="text-sm leading-6 text-gray-600">
                             {card.description}
                           </p>
-
-                          <p className="mt-2 text-xs font-semibold text-gray-500">
-                            {card.note}
-                          </p>
-
-                          {activeConnection && (
-                            <p className="mt-3 rounded-2xl bg-[#f8f0ff] px-4 py-3 text-xs font-semibold text-[#100516]">
-                              external_user_id:{' '}
-                              {activeConnection.external_user_id}
-                            </p>
-                          )}
                         </div>
 
                         <div className="flex md:justify-end">

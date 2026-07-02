@@ -1,4 +1,4 @@
-type DecorativeDiscProps = {
+﻿type DecorativeDiscProps = {
   position?: 'left' | 'right'
   opacity?: string
 }

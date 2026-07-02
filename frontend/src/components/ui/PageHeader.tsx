@@ -1,4 +1,4 @@
-type PageHeaderProps = {
+﻿type PageHeaderProps = {
   label: string
   title: string
   description: string

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type KeyboardEvent } from 'react'
+﻿import { useCallback, useEffect, useState, type KeyboardEvent } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { AppHeader } from '../components/layout/AppHeader'
@@ -99,11 +99,7 @@ export function ChatPage() {
         return
       }
 
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError('Не удалось загрузить чат')
-      }
+      setError('Не удалось загрузить чат. Попробуй открыть его ещё раз.')
     } finally {
       setIsLoading(false)
     }
@@ -169,22 +165,14 @@ export function ChatPage() {
 
           setMessages((currentMessages) => [...currentMessages, createdMessage])
           setMessageText('')
-        } catch (refreshError) {
-          if (refreshError instanceof Error) {
-            setError(refreshError.message)
-          } else {
-            setError('Не удалось отправить сообщение')
-          }
+        } catch {
+          setError('Не удалось отправить сообщение. Попробуй ещё раз.')
         }
 
         return
       }
 
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError('Не удалось отправить сообщение')
-      }
+      setError('Не удалось отправить сообщение. Попробуй ещё раз.')
     } finally {
       setIsSending(false)
     }
@@ -230,7 +218,7 @@ export function ChatPage() {
   const partnerAge = partner?.age
   const partnerCity = partner?.city ?? 'Город не указан'
   const partnerBio =
-    partner?.bio ?? 'Данные пользователя доступны через список матчей.'
+    partner?.bio ?? 'Открой список Мэтчей, чтобы посмотреть больше информации.'
   const partnerAvatarUrl = partner?.avatar_url ?? ''
   const partnerLetter = partnerName[0]?.toUpperCase() || 'S'
   const compatibility = match?.compatibility_percent
@@ -248,7 +236,7 @@ export function ChatPage() {
           <PageHeader
             label="Чат"
             title={chatTitle}
-            description="Сообщения загружаются и сохраняются через backend."
+            description="Общайся с человеком, с которым у вас совпали музыкальные вкусы."
           />
 
           {error && (
@@ -282,7 +270,7 @@ export function ChatPage() {
                 )}
               </div>
 
-              <h2 className="text-3xl font-black text-[#100516]">
+              <h2 className="break-words text-3xl font-black text-[#100516]">
                 {partnerAge ? `${partnerName}, ${partnerAge}` : partnerName}
               </h2>
 
@@ -311,14 +299,14 @@ export function ChatPage() {
                 type="button"
                 onClick={() => navigate('/matches')}
               >
-                Назад к матчам
+                Назад к Мэтчам
               </button>
             </aside>
 
             <section className="overflow-hidden rounded-[34px] border border-white/60 bg-white/75 shadow-[0_25px_80px_rgba(80,0,120,0.14)] backdrop-blur-xl">
               <div className="border-b border-[#d923ff]/15 bg-white/70 px-6 py-5">
                 <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#9c20c7]">
-                  Backend chat
+                  Переписка
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black text-[#100516]">
@@ -373,7 +361,7 @@ export function ChatPage() {
                         </h3>
 
                         <p className="text-sm text-gray-600">
-                          Напиши первое сообщение. Оно сохранится на backend.
+                          Начни разговор первым.
                         </p>
                       </div>
                     </div>
@@ -412,3 +400,4 @@ export function ChatPage() {
     </main>
   )
 }
+

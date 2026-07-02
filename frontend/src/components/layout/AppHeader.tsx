@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router'
+﻿import { Link, useNavigate } from 'react-router'
 
 import { clearTokens } from '../../shared/api/tokenStorage'
 
@@ -19,7 +19,7 @@ const navItems: Array<{
     page: 'feed',
   },
   {
-    label: 'Матчи',
+    label: 'Мэтчи',
     path: '/matches',
     page: 'matches',
   },

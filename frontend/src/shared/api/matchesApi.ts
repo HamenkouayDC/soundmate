@@ -35,3 +35,4 @@ export async function getMatches(accessToken: string): Promise<MatchesResponse> 
     token: accessToken,
   })
 }
+

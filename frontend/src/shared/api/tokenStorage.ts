@@ -1,4 +1,4 @@
-const ACCESS_TOKEN_KEY = 'soundmate_access_token'
+﻿const ACCESS_TOKEN_KEY = 'soundmate_access_token'
 const REFRESH_TOKEN_KEY = 'soundmate_refresh_token'
 
 export function saveTokens(access: string, refresh: string) {

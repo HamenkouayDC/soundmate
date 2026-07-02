@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+﻿import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { AppHeader } from '../components/layout/AppHeader'
@@ -76,11 +76,7 @@ export function FeedPage() {
         return
       }
 
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError('Не удалось загрузить ленту')
-      }
+      setError('Не удалось загрузить ленту. Попробуй обновить страницу.')
     } finally {
       setIsLoading(false)
     }
@@ -124,7 +120,7 @@ export function FeedPage() {
 
       if (action === 'like') {
         if (result.is_match) {
-          setLastAction(`Это match с пользователем ${currentUser.name}!`)
+          setLastAction(`У вас мэтч с пользователем ${currentUser.name}!`)
         } else {
           setLastAction(`Лайк отправлен пользователю ${currentUser.name}`)
         }
@@ -156,7 +152,7 @@ export function FeedPage() {
 
           if (action === 'like') {
             if (result.is_match) {
-              setLastAction(`Это match с пользователем ${currentUser.name}!`)
+              setLastAction(`У вас мэтч с пользователем ${currentUser.name}!`)
             } else {
               setLastAction(`Лайк отправлен пользователю ${currentUser.name}`)
             }
@@ -165,22 +161,14 @@ export function FeedPage() {
           }
 
           setCurrentIndex((prevIndex) => prevIndex + 1)
-        } catch (refreshError) {
-          if (refreshError instanceof Error) {
-            setError(refreshError.message)
-          } else {
-            setError('Не удалось выполнить действие')
-          }
+        } catch {
+          setError('Не удалось выполнить действие. Попробуй ещё раз.')
         }
 
         return
       }
 
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError('Не удалось выполнить действие')
-      }
+      setError('Не удалось выполнить действие. Попробуй ещё раз.')
     } finally {
       setIsActionLoading(false)
     }
@@ -209,7 +197,7 @@ export function FeedPage() {
           <PageHeader
             label="Лента анкет"
             title="Люди с похожим музыкальным вкусом"
-            description="Карточки теперь приходят с backend через GET /feed/. Лайки и пропуски отправляются через POST /feed/actions/."
+            description="Смотри анкеты, находи совпадения по жанрам и артистам и выбирай, с кем хочешь познакомиться."
           />
 
           {error && (
@@ -221,7 +209,7 @@ export function FeedPage() {
           <div className="grid gap-8 lg:grid-cols-[1fr_440px] lg:items-start">
             <aside className="hidden rounded-[34px] border border-white/60 bg-white/70 p-8 shadow-[0_25px_80px_rgba(80,0,120,0.14)] backdrop-blur-xl lg:block">
               <p className="mb-2 text-sm font-bold uppercase tracking-[0.25em] text-[#9c20c7]">
-                Как работает лента
+                Как это работает
               </p>
 
               <h2 className="text-3xl font-black text-[#100516]">
@@ -229,39 +217,36 @@ export function FeedPage() {
               </h2>
 
               <p className="mt-4 text-sm leading-7 text-gray-600">
-                SoundMate показывает людей, с которыми у тебя могут совпадать
-                жанры, исполнители и музыкальное настроение. Теперь данные
-                берутся из backend, а уже пролайканные и пропущенные анкеты
-                исключаются из ленты.
+                SoundMate подбирает людей, с которыми у тебя могут совпадать
+                музыкальные интересы, любимые исполнители и настроение.
               </p>
 
               <div className="mt-8 grid gap-4">
                 <div className="rounded-3xl bg-[#f8f0ff]/90 p-5">
                   <p className="text-sm font-black text-[#100516]">
-                    Совместимость
+                    Совпадения
                   </p>
 
                   <p className="mt-2 text-sm text-gray-600">
-                    Процент приходит с backend в поле compatibility_percent.
+                    Смотри, насколько близки ваши музыкальные вкусы.
                   </p>
                 </div>
 
                 <div className="rounded-3xl bg-[#f8f0ff]/90 p-5">
                   <p className="text-sm font-black text-[#100516]">
-                    Лайк / следующий
+                    Лайк или пропуск
                   </p>
 
                   <p className="mt-2 text-sm text-gray-600">
-                    Действия сохраняются на backend через endpoint
-                    /feed/actions/.
+                    Выбирай, хочешь ли познакомиться с человеком.
                   </p>
                 </div>
 
                 <div className="rounded-3xl bg-[#08050d] p-5 text-white">
-                  <p className="text-sm font-black">Backend connected</p>
+                  <p className="text-sm font-black">Когда случается мэтч</p>
 
                   <p className="mt-2 text-sm leading-6 text-white/70">
-                    Лента, лайки и пропуски уже подключены к реальному API.
+                    Если симпатия взаимна, вы сможете перейти в чат.
                   </p>
                 </div>
               </div>
@@ -279,7 +264,7 @@ export function FeedPage() {
                   </h2>
 
                   <p className="text-gray-600">
-                    Получаем рекомендации с backend.
+                    Подбираем анкеты с похожим музыкальным вкусом.
                   </p>
                 </div>
               ) : currentUser ? (
@@ -329,19 +314,19 @@ export function FeedPage() {
                   </div>
 
                   <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black via-black/95 to-transparent p-6 pt-28 text-white md:p-7 md:pt-32">
-                    <div className="mb-4 flex items-start justify-between gap-4">
+                    <div className="mb-4 flex items-start justify-between gap-3">
                       <div>
-                        <h2 className="text-3xl font-black">
+                        <h2 className="max-w-[260px] break-words text-2xl font-black leading-tight md:text-3xl">
                           {currentUser.name}, {currentUser.age}
                         </h2>
 
-                        <p className="mt-1 text-sm text-[#e8c8f3]">
+                        <p className="mt-1 max-w-[260px] break-words text-sm leading-5 text-[#e8c8f3]">
                           {currentUser.city || 'Город не указан'} ·{' '}
                           {currentUser.mood || 'музыкальный вайб'}
                         </p>
                       </div>
 
-                      <span className="rounded-full bg-[#d923ff] px-4 py-2 text-sm font-bold shadow-[0_0_20px_rgba(217,35,255,0.45)]">
+                      <span className="shrink-0 rounded-full bg-[#d923ff] px-4 py-2 text-sm font-bold shadow-[0_0_20px_rgba(217,35,255,0.45)]">
                         {formatCompatibility(
                           currentUser.compatibility_percent,
                         )}
@@ -437,9 +422,8 @@ export function FeedPage() {
                   </h2>
 
                   <p className="mb-6 text-gray-600">
-                    Backend больше не отдаёт пользователей, которых ты уже
-                    лайкнул или пропустил. Можно обновить ленту или попросить
-                    backend заново выполнить seed_demo_profiles.
+                    Ты уже посмотрел все доступные анкеты. Попробуй обновить
+                    ленту позже.
                   </p>
 
                   <button

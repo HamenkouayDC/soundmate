@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+﻿import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { AppHeader } from '../components/layout/AppHeader'
@@ -64,11 +64,7 @@ export function MatchesPage() {
         return
       }
 
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError('Не удалось загрузить матчи')
-      }
+      setError('Не удалось загрузить совпадения. Попробуй обновить страницу.')
     } finally {
       setIsLoading(false)
     }
@@ -106,9 +102,9 @@ export function MatchesPage() {
 
         <div className="relative z-10 mx-auto max-w-6xl">
           <PageHeader
-            label="Матчи"
+            label="Мэтчи"
             title="Взаимные музыкальные совпадения"
-            description="Матчи теперь приходят с backend через GET /matches/. Здесь отображаются пользователи, с которыми получился взаимный лайк."
+            description="Здесь собраны люди, с которыми у вас случился взаимный интерес. Можно перейти в чат и начать общение."
           />
 
           {error && (
@@ -120,23 +116,22 @@ export function MatchesPage() {
           <div className="grid gap-8 lg:grid-cols-[360px_1fr] lg:items-start">
             <aside className="rounded-[34px] border border-white/60 bg-white/70 p-8 shadow-[0_25px_80px_rgba(80,0,120,0.14)] backdrop-blur-xl">
               <p className="mb-2 text-sm font-bold uppercase tracking-[0.25em] text-[#9c20c7]">
-                Backend connected
+                Твои совпадения
               </p>
 
               <h2 className="text-3xl font-black text-[#100516]">
-                Здесь только взаимные лайки
+                Люди, которым ты тоже понравился
               </h2>
 
               <p className="mt-4 text-sm leading-7 text-gray-600">
-                Когда пользователь ставит лайк в ленте, backend проверяет,
-                есть ли ответный лайк. Если есть, создаётся match, и он
-                появляется на этой странице.
+                Когда симпатия взаимна, анкета появляется на этой странице.
+                Здесь можно посмотреть совпадения и перейти в чат.
               </p>
 
               <div className="mt-8 grid gap-4">
                 <div className="rounded-3xl bg-[#f8f0ff]/90 p-5">
                   <p className="text-sm font-black text-[#100516]">
-                    Всего матчей
+                    Всего совпадений
                   </p>
 
                   <p className="mt-2 text-3xl font-black text-[#d923ff]">
@@ -146,11 +141,12 @@ export function MatchesPage() {
 
                 <div className="rounded-3xl bg-[#f8f0ff]/90 p-5">
                   <p className="text-sm font-black text-[#100516]">
-                    Совместимость
+                    Совпадение по вкусу
                   </p>
 
                   <p className="mt-2 text-sm text-gray-600">
-                    Процент, общие жанры и исполнители приходят с backend.
+                    Учитываются любимые жанры, исполнители и музыкальные
+                    интересы.
                   </p>
                 </div>
 
@@ -158,7 +154,7 @@ export function MatchesPage() {
                   <p className="text-sm font-black">Чат</p>
 
                   <p className="mt-2 text-sm leading-6 text-white/70">
-                    Кнопка “Открыть чат” ведёт на страницу /chat/:matchId.
+                    Открой переписку и начни общение.
                   </p>
                 </div>
               </div>
@@ -172,11 +168,11 @@ export function MatchesPage() {
                   </div>
 
                   <h2 className="mb-3 text-2xl font-black text-[#100516]">
-                    Загружаем матчи...
+                    Загружаем совпадения...
                   </h2>
 
                   <p className="text-gray-600">
-                    Получаем взаимные лайки с backend.
+                    Подбираем людей, с которыми у тебя случился мэтч.
                   </p>
                 </div>
               ) : matches.length > 0 ? (
@@ -218,7 +214,7 @@ export function MatchesPage() {
                           <div className="p-6 md:p-7">
                             <div className="mb-5 flex flex-col justify-between gap-4 md:flex-row md:items-start">
                               <div>
-                                <h2 className="text-3xl font-black text-[#100516]">
+                                <h2 className="break-words text-3xl font-black leading-tight text-[#100516]">
                                   {match.user.name}, {match.user.age}
                                 </h2>
 
@@ -227,7 +223,7 @@ export function MatchesPage() {
                                 </p>
                               </div>
 
-                              <span className="w-fit rounded-full bg-[#d923ff] px-4 py-2 text-sm font-bold text-white shadow-[0_0_20px_rgba(217,35,255,0.35)]">
+                              <span className="w-fit shrink-0 rounded-full bg-[#d923ff] px-4 py-2 text-sm font-bold text-white shadow-[0_0_20px_rgba(217,35,255,0.35)]">
                                 {formatCompatibility(
                                   match.compatibility_percent,
                                 )}
@@ -312,7 +308,7 @@ export function MatchesPage() {
                               )}
                             </div>
 
-                            <div className="flex flex-col gap-3 sm:flex-row">
+                            <div className="flex">
                               <button
                                 className="rounded-2xl bg-[#d923ff] px-6 py-4 font-bold text-white shadow-[0_0_25px_rgba(217,35,255,0.35)] transition hover:scale-[1.02]"
                                 type="button"
@@ -320,7 +316,6 @@ export function MatchesPage() {
                               >
                                 Открыть чат
                               </button>
-
                             </div>
                           </div>
                         </div>
@@ -335,12 +330,12 @@ export function MatchesPage() {
                   </div>
 
                   <h2 className="mb-3 text-2xl font-black text-[#100516]">
-                    Матчей пока нет
+                    Мэтчей пока нет
                   </h2>
 
                   <p className="mb-6 text-gray-600">
-                    Поставь лайки в ленте. Если backend найдёт взаимный лайк,
-                    match появится здесь.
+                    Поставь лайки в ленте. Если симпатия взаимна, совпадение
+                    появится здесь.
                   </p>
 
                   <button
@@ -359,3 +354,4 @@ export function MatchesPage() {
     </main>
   )
 }
+
