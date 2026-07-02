@@ -1,5 +1,6 @@
 ﻿import { Link, useNavigate } from 'react-router'
 
+import logoImage from '../../assets/soundmate-logo-transparent.png'
 import { clearTokens } from '../../shared/api/tokenStorage'
 
 type ActivePage = 'feed' | 'matches' | 'music' | 'profile'
@@ -46,10 +47,12 @@ export function AppHeader({ activePage }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-[#08050d]/95 px-6 py-4 text-white shadow-[0_12px_40px_rgba(0,0,0,0.25)] backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <Link className="flex items-center gap-3" to="/feed">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#f13bff] bg-black/30 text-2xl font-black text-[#f13bff] shadow-[0_0_25px_rgba(217,35,255,0.45)]">
-            ♪
-          </span>
+        <Link className="flex w-fit items-center gap-3" to="/feed">
+          <img
+            className="h-12 w-12 object-contain"
+            src={logoImage}
+            alt="SoundMate"
+          />
 
           <div>
             <p className="text-lg font-black leading-none">SoundMate</p>
