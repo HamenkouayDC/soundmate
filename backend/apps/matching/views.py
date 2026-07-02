@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
@@ -69,8 +71,11 @@ class MatchesListView(generics.GenericAPIView):
         ).distinct()
 
         results = [build_match_item(match, request.user, request) for match in matches]
+        no_message_epoch = datetime.min.replace(tzinfo=timezone.utc)
         results.sort(
-            key=lambda item: item["last_message"]["created_at"] if item["last_message"] else "",
+            key=lambda item: (
+                item["last_message"]["created_at"] if item["last_message"] else no_message_epoch
+            ),
             reverse=True,
         )
         return Response({"results": results})

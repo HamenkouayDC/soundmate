@@ -4,12 +4,20 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand
 
+from apps.matching.models import FeedAction, FeedActionType
 from apps.music.embedding_service import rebuild_profile_mood_from_embedding
 from apps.music.models import MusicProvider, MusicTaste
 from apps.profiles.models import Profile
 from apps.users.models import User
 
 DEMO_PASSWORD = "demopass123"
+
+# Эти demo-аккаунты заранее "лайкают" всех остальных demo-пользователей,
+# чтобы в демо можно было получить матч, просто лайкнув их в /feed.
+DEMO_HUB_EMAILS = [
+    "demo.folk@soundmate.local",
+    "demo.latin@soundmate.local",
+]
 
 
 class Command(BaseCommand):
@@ -25,6 +33,7 @@ class Command(BaseCommand):
         profiles_data = json.loads(dataset_path.read_text(encoding="utf-8"))
         created = 0
         updated = 0
+        users_by_email: dict[str, User] = {}
 
         for item in profiles_data:
             user, was_created = User.objects.get_or_create(
@@ -37,6 +46,7 @@ class Command(BaseCommand):
                 created += 1
             else:
                 updated += 1
+            users_by_email[item["email"]] = user
 
             profile, _ = Profile.objects.get_or_create(
                 user=user,
@@ -66,10 +76,31 @@ class Command(BaseCommand):
                     },
                 )
 
+        preliked = self._seed_incoming_likes(users_by_email)
+
         self.stdout.write(
             self.style.SUCCESS(
                 f"Готово: {len(profiles_data)} профилей "
                 f"(новых пользователей: {created}, обновлено: {updated}). "
+                f"Предзагружено {preliked} входящих лайков от {', '.join(DEMO_HUB_EMAILS)} "
+                f"для демо-матчей. "
                 f"Пароль демо-аккаунтов: {DEMO_PASSWORD}"
             )
         )
+
+    def _seed_incoming_likes(self, users_by_email: dict[str, User]) -> int:
+        """Хаб-аккаунты заранее лайкают всех остальных, чтобы ответный лайк
+        любого demo-пользователя сразу создавал матч (is_match: true)."""
+        hub_users = [users_by_email[email] for email in DEMO_HUB_EMAILS if email in users_by_email]
+        count = 0
+        for hub_user in hub_users:
+            for target_user in users_by_email.values():
+                if target_user.id == hub_user.id:
+                    continue
+                FeedAction.objects.update_or_create(
+                    actor=hub_user,
+                    target=target_user,
+                    defaults={"action": FeedActionType.LIKE},
+                )
+                count += 1
+        return count

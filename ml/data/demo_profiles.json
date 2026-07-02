@@ -1,7 +1,7 @@
 [
   {
     "email": "demo.rock@soundmate.local",
-    "display_name": "Аня — рок",
+    "display_name": "Аня",
     "city": "Москва",
     "birth_date": "1998-03-14",
     "bio": "Классический и альтернативный рок.",
@@ -105,7 +105,7 @@
   },
   {
     "email": "demo.metal@soundmate.local",
-    "display_name": "Макс — метал",
+    "display_name": "Макс",
     "bio": "Heavy и alternative metal.",
     "artists": [
       {
@@ -207,7 +207,7 @@
   },
   {
     "email": "demo.pop@soundmate.local",
-    "display_name": "Катя — поп",
+    "display_name": "Катя",
     "bio": "Поп и инди-поп.",
     "artists": [
       {
@@ -311,7 +311,7 @@
   },
   {
     "email": "demo.hiphop@soundmate.local",
-    "display_name": "Денис — хип-хоп",
+    "display_name": "Денис",
     "bio": "Русский и западный rap.",
     "artists": [
       {
@@ -413,7 +413,7 @@
   },
   {
     "email": "demo.electronic@soundmate.local",
-    "display_name": "Ира — электроника",
+    "display_name": "Ира",
     "bio": "House, techno, ambient.",
     "artists": [
       {
@@ -516,7 +516,7 @@
   },
   {
     "email": "demo.jazz@soundmate.local",
-    "display_name": "Олег — джаз",
+    "display_name": "Олег",
     "bio": "Smooth jazz и soul.",
     "artists": [
       {
@@ -619,7 +619,7 @@
   },
   {
     "email": "demo.indie@soundmate.local",
-    "display_name": "Лиза — инди",
+    "display_name": "Лиза",
     "bio": "Indie rock и dream pop.",
     "artists": [
       {
@@ -723,7 +723,7 @@
   },
   {
     "email": "demo.kpop@soundmate.local",
-    "display_name": "Соня — K-pop",
+    "display_name": "Соня",
     "bio": "K-pop и dance pop.",
     "artists": [
       {
@@ -826,7 +826,7 @@
   },
   {
     "email": "demo.folk@soundmate.local",
-    "display_name": "Пётр — фолк",
+    "display_name": "Пётр",
     "bio": "Акустика и авторская песня.",
     "artists": [
       {
@@ -930,7 +930,7 @@
   },
   {
     "email": "demo.rnb@soundmate.local",
-    "display_name": "Мила — R&B",
+    "display_name": "Мила",
     "bio": "Современный R&B и neo soul.",
     "artists": [
       {
@@ -1034,7 +1034,7 @@
   },
   {
     "email": "demo.latin@soundmate.local",
-    "display_name": "Карлос — латино",
+    "display_name": "Карлос",
     "bio": "Reggaeton и latin pop.",
     "artists": [
       {
@@ -1138,7 +1138,7 @@
   },
   {
     "email": "demo.ambient@soundmate.local",
-    "display_name": "Ника — ambient",
+    "display_name": "Ника",
     "bio": "Ambient и lo-fi.",
     "artists": [
       {
@@ -1242,7 +1242,7 @@
   },
   {
     "email": "demo.lastfm@soundmate.local",
-    "display_name": "Вика — Last.fm only",
+    "display_name": "Вика",
     "city": "Москва",
     "birth_date": "1998-03-14",
     "bio": "Демо без Spotify: только жанры из Last.fm.",

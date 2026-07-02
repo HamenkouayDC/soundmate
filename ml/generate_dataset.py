@@ -19,7 +19,7 @@ DATA_PATH = Path(__file__).parent / "data" / "demo_profiles.json"
 DEMO_PERSONAS = [
     {
         "email": "demo.rock@soundmate.local",
-        "display_name": "Аня — рок",
+        "display_name": "Аня",
         "city": "Москва",
         "birth_date": "1998-03-14",
         "bio": "Классический и альтернативный рок.",
@@ -35,7 +35,7 @@ DEMO_PERSONAS = [
     },
     {
         "email": "demo.metal@soundmate.local",
-        "display_name": "Макс — метал",
+        "display_name": "Макс",
         "bio": "Heavy и alternative metal.",
         "artists": [
             {"name": "Metallica", "genres": ["metal", "thrash metal"]},
@@ -49,7 +49,7 @@ DEMO_PERSONAS = [
     },
     {
         "email": "demo.pop@soundmate.local",
-        "display_name": "Катя — поп",
+        "display_name": "Катя",
         "bio": "Поп и инди-поп.",
         "artists": [
             {"name": "Dua Lipa", "genres": ["pop", "dance pop"]},
@@ -63,7 +63,7 @@ DEMO_PERSONAS = [
     },
     {
         "email": "demo.hiphop@soundmate.local",
-        "display_name": "Денис — хип-хоп",
+        "display_name": "Денис",
         "bio": "Русский и западный rap.",
         "artists": [
             {"name": "Eminem", "genres": ["hip hop", "rap"]},
@@ -77,7 +77,7 @@ DEMO_PERSONAS = [
     },
     {
         "email": "demo.electronic@soundmate.local",
-        "display_name": "Ира — электроника",
+        "display_name": "Ира",
         "bio": "House, techno, ambient.",
         "artists": [
             {"name": "Daft Punk", "genres": ["electronic", "house"]},
@@ -91,7 +91,7 @@ DEMO_PERSONAS = [
     },
     {
         "email": "demo.jazz@soundmate.local",
-        "display_name": "Олег — джаз",
+        "display_name": "Олег",
         "bio": "Smooth jazz и soul.",
         "artists": [
             {"name": "Miles Davis", "genres": ["jazz", "cool jazz"]},
@@ -105,7 +105,7 @@ DEMO_PERSONAS = [
     },
     {
         "email": "demo.indie@soundmate.local",
-        "display_name": "Лиза — инди",
+        "display_name": "Лиза",
         "bio": "Indie rock и dream pop.",
         "artists": [
             {"name": "Tame Impala", "genres": ["psychedelic rock", "indie"]},
@@ -119,7 +119,7 @@ DEMO_PERSONAS = [
     },
     {
         "email": "demo.kpop@soundmate.local",
-        "display_name": "Соня — K-pop",
+        "display_name": "Соня",
         "bio": "K-pop и dance pop.",
         "artists": [
             {"name": "BTS", "genres": ["k-pop", "pop"]},
@@ -133,7 +133,7 @@ DEMO_PERSONAS = [
     },
     {
         "email": "demo.folk@soundmate.local",
-        "display_name": "Пётр — фолк",
+        "display_name": "Пётр",
         "bio": "Акустика и авторская песня.",
         "artists": [
             {"name": "Simon & Garfunkel", "genres": ["folk", "folk rock"]},
@@ -147,7 +147,7 @@ DEMO_PERSONAS = [
     },
     {
         "email": "demo.rnb@soundmate.local",
-        "display_name": "Мила — R&B",
+        "display_name": "Мила",
         "bio": "Современный R&B и neo soul.",
         "artists": [
             {"name": "SZA", "genres": ["rnb", "neo soul"]},
@@ -161,7 +161,7 @@ DEMO_PERSONAS = [
     },
     {
         "email": "demo.latin@soundmate.local",
-        "display_name": "Карлос — латино",
+        "display_name": "Карлос",
         "bio": "Reggaeton и latin pop.",
         "artists": [
             {"name": "Bad Bunny", "genres": ["reggaeton", "latin"]},
@@ -175,7 +175,7 @@ DEMO_PERSONAS = [
     },
     {
         "email": "demo.ambient@soundmate.local",
-        "display_name": "Ника — ambient",
+        "display_name": "Ника",
         "bio": "Ambient и lo-fi.",
         "artists": [
             {"name": "Brian Eno", "genres": ["ambient", "electronic"]},
@@ -233,7 +233,7 @@ def main() -> None:
     profiles = [build_persona(p, index=index) for index, p in enumerate(DEMO_PERSONAS)]
     profiles.append(build_persona(DEMO_PERSONAS[0], index=len(DEMO_PERSONAS), lastfm_only=True))
     profiles[-1]["email"] = "demo.lastfm@soundmate.local"
-    profiles[-1]["display_name"] = "Вика — Last.fm only"
+    profiles[-1]["display_name"] = "Вика"
     profiles[-1]["bio"] = "Демо без Spotify: только жанры из Last.fm."
 
     DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
