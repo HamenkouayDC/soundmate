@@ -1,4 +1,6 @@
-﻿import { apiClient } from './apiClient'
+﻿import { ApiError, apiClient } from './apiClient'
+
+const API_URL = import.meta.env.VITE_API_URL
 
 export type MyProfile = {
   id?: string
@@ -33,4 +35,34 @@ export async function updateMyProfile(
     token: accessToken,
     body: payload,
   })
+}
+
+export async function uploadMyAvatar(
+  accessToken: string,
+  file: File,
+): Promise<MyProfile> {
+  const formData = new FormData()
+
+  formData.append('avatar', file)
+
+  const response = await fetch(`${API_URL}/profiles/me/avatar/`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: formData,
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => '')
+
+    throw new ApiError(
+      `HTTP ${response.status}: ${
+        errorText || 'Не удалось загрузить аватар'
+      }`,
+      response.status,
+    )
+  }
+
+  return response.json()
 }

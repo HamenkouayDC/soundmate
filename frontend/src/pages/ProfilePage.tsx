@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router'
 
 import { AppHeader } from '../components/layout/AppHeader'
@@ -12,6 +12,7 @@ import { refreshAccessToken } from '../shared/api/authApi'
 import {
   getMyProfile,
   updateMyProfile,
+  uploadMyAvatar,
   type MyProfile,
 } from '../shared/api/profileApi'
 import { getCurrentUser, type CurrentUser } from '../shared/api/userApi'
@@ -55,6 +56,7 @@ export function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -173,7 +175,6 @@ export function ProfilePage() {
           ...currentUser.profile,
           display_name: updatedProfile.display_name,
           birth_date: updatedProfile.birth_date,
-          city: updatedProfile.city,
           bio: updatedProfile.bio,
           avatar_url: updatedProfile.avatar_url ?? currentUser.profile.avatar_url,
           preview_track_url:
@@ -194,6 +195,10 @@ export function ProfilePage() {
       city: form.city.trim(),
       bio: form.bio.trim(),
     })
+  }
+
+  async function uploadAvatarWithToken(token: string, file: File) {
+    return uploadMyAvatar(token, file)
   }
 
   async function handleSaveProfile() {
@@ -275,6 +280,93 @@ export function ProfilePage() {
     }
   }
 
+  async function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+
+    event.target.value = ''
+
+    if (!file) {
+      return
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setSuccessMessage('')
+      setError('Можно загрузить только изображение')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setSuccessMessage('')
+      setError('Размер изображения не должен превышать 5 МБ')
+      return
+    }
+
+    const accessToken = getAccessToken()
+
+    if (!accessToken) {
+      clearTokens()
+      navigate('/login')
+      return
+    }
+
+    try {
+      setIsUploadingAvatar(true)
+      setError('')
+      setSuccessMessage('')
+
+      const updatedProfile = await uploadAvatarWithToken(accessToken, file)
+      const updatedForm = createFormFromProfile(updatedProfile)
+
+      updateUserProfile(updatedProfile)
+      setProfileForm(updatedForm)
+      setSavedProfileForm(updatedForm)
+      setSuccessMessage('Аватар профиля загружен.')
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        const refreshToken = getRefreshToken()
+
+        if (!refreshToken) {
+          clearTokens()
+          navigate('/login')
+          return
+        }
+
+        try {
+          const newTokens = await refreshAccessToken(refreshToken)
+
+          saveAccessToken(newTokens.access)
+
+          const updatedProfile = await uploadAvatarWithToken(
+            newTokens.access,
+            file,
+          )
+          const updatedForm = createFormFromProfile(updatedProfile)
+
+          updateUserProfile(updatedProfile)
+          setProfileForm(updatedForm)
+          setSavedProfileForm(updatedForm)
+          setSuccessMessage('Аватар профиля загружен.')
+        } catch (refreshError) {
+          if (refreshError instanceof Error) {
+            setError(refreshError.message)
+          } else {
+            setError('Не удалось загрузить аватар')
+          }
+        }
+
+        return
+      }
+
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Не удалось загрузить аватар')
+      }
+    } finally {
+      setIsUploadingAvatar(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <main className="min-h-screen bg-[#f8f0ff]">
@@ -324,7 +416,7 @@ export function ProfilePage() {
           <PageHeader
             label="Мой профиль"
             title="Настрой, как тебя увидят другие"
-            description="Здесь собрана основная информация о тебе и музыкальные интересы. Имя, город, дата рождения и описание теперь сохраняются через backend."
+            description="Здесь собрана основная информация о тебе и музыкальные интересы. Имя, город, дата рождения, описание и аватар теперь сохраняются через backend."
           />
 
           {successMessage && (
@@ -347,7 +439,7 @@ export function ProfilePage() {
                 </p>
 
                 <span className="rounded-full bg-[#f4d8ff] px-3 py-1 text-xs font-bold text-[#9c20c7]">
-                  4 фото
+                  backend
                 </span>
               </div>
 
@@ -381,6 +473,28 @@ export function ProfilePage() {
                   <span className="h-2 w-2 rounded-full bg-white/45" />
                 </div>
               </div>
+
+              <label
+                className={`mt-5 flex w-full items-center justify-center rounded-full bg-[#100516] px-5 py-3 text-sm font-bold text-white shadow-lg transition ${
+                  isUploadingAvatar
+                    ? 'cursor-not-allowed opacity-60'
+                    : 'cursor-pointer hover:-translate-y-0.5 hover:bg-[#271036]'
+                }`}
+              >
+                {isUploadingAvatar ? 'Загрузка фото...' : 'Загрузить фото'}
+
+                <input
+                  className="hidden"
+                  type="file"
+                  accept="image/*"
+                  disabled={isUploadingAvatar}
+                  onChange={handleAvatarChange}
+                />
+              </label>
+
+              <p className="mt-3 text-center text-xs text-gray-500">
+                Поддерживаются изображения до 5 МБ.
+              </p>
 
               <div className="mt-6">
                 <h2 className="text-3xl font-black text-[#100516]">
@@ -594,13 +708,21 @@ export function ProfilePage() {
                     <p className="mt-3 max-w-xl text-sm leading-6 text-white/70">
                       В ленте будет отображаться короткая карточка: имя, город,
                       фото, описание и музыкальные совпадения. После сохранения
-                      имя, город и описание обновляются через backend.
+                      имя, город, описание и аватар обновляются через backend.
                     </p>
                   </div>
 
                   <div className="rounded-[28px] border border-white/10 bg-white/10 p-4">
-                    <div className="mb-4 flex h-32 items-center justify-center rounded-2xl bg-black/40 text-5xl font-black text-[#f13bff]">
-                      {avatarLetter}
+                    <div className="mb-4 flex h-32 items-center justify-center overflow-hidden rounded-2xl bg-black/40 text-5xl font-black text-[#f13bff]">
+                      {user.profile.avatar_url ? (
+                        <img
+                          className="h-full w-full object-cover"
+                          src={user.profile.avatar_url}
+                          alt="Миниатюра аватара"
+                        />
+                      ) : (
+                        avatarLetter
+                      )}
                     </div>
 
                     <h3 className="text-xl font-black">
