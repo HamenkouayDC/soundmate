@@ -10,6 +10,10 @@ import { Tag } from '../components/ui/Tag'
 import { ApiError } from '../shared/api/apiClient'
 import { refreshAccessToken } from '../shared/api/authApi'
 import {
+  getMusicPassport,
+  type MusicPassport,
+} from '../shared/api/musicPassportApi'
+import {
   getMyProfile,
   updateMyProfile,
   uploadMyAvatar,
@@ -22,9 +26,6 @@ import {
   getRefreshToken,
   saveAccessToken,
 } from '../shared/api/tokenStorage'
-
-const mockGenres = ['Indie', 'Rock', 'Hip-Hop', 'Pop']
-const mockArtists = ['Arctic Monkeys', 'Nirvana', 'The Weeknd']
 
 type ProfileForm = {
   displayName: string
@@ -52,13 +53,16 @@ export function ProfilePage() {
   const [savedProfileForm, setSavedProfileForm] = useState<ProfileForm | null>(
     null,
   )
+  const [musicPassport, setMusicPassport] = useState<MusicPassport | null>(null)
 
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [isMusicPassportLoading, setIsMusicPassportLoading] = useState(true)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [musicPassportError, setMusicPassportError] = useState('')
 
   async function loadUserAndProfileWithToken(token: string) {
     const currentUser = await getCurrentUser(token)
@@ -84,6 +88,25 @@ export function ProfilePage() {
 
     setProfileForm(initialForm)
     setSavedProfileForm(initialForm)
+
+    try {
+      setIsMusicPassportLoading(true)
+      setMusicPassportError('')
+
+      const passport = await getMusicPassport(token)
+
+      setMusicPassport(passport)
+    } catch (passportError) {
+      setMusicPassport(null)
+
+      if (passportError instanceof Error) {
+        setMusicPassportError(passportError.message)
+      } else {
+        setMusicPassportError('Не удалось загрузить Music Passport')
+      }
+    } finally {
+      setIsMusicPassportLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -400,6 +423,9 @@ export function ProfilePage() {
   }
 
   const avatarLetter = profileForm.displayName[0]?.toUpperCase() || 'S'
+  const genres = musicPassport?.genres ?? []
+  const artists = musicPassport?.artists ?? []
+  const tracks = musicPassport?.top_tracks ?? []
 
   return (
     <main className="min-h-screen bg-[#f8f0ff]">
@@ -416,7 +442,7 @@ export function ProfilePage() {
           <PageHeader
             label="Мой профиль"
             title="Настрой, как тебя увидят другие"
-            description="Здесь собрана основная информация о тебе и музыкальные интересы. Имя, город, дата рождения, описание и аватар теперь сохраняются через backend."
+            description="Здесь собрана основная информация, аватар и Music Passport. Данные профиля и музыкальный паспорт загружаются через backend."
           />
 
           {successMessage && (
@@ -653,45 +679,109 @@ export function ProfilePage() {
                     </h2>
 
                     <p className="mt-2 text-sm text-gray-600">
-                      Сейчас это mock-данные. Следующим шагом подключим music
-                      passport через backend.
+                      Жанры, исполнители и топ-треки загружаются через backend
+                      endpoint /music/passport/.
                     </p>
                   </div>
 
                   <Button type="button" disabled>
-                    Редактирование скоро
+                    Music Passport
                   </Button>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="rounded-3xl bg-[#f8f0ff]/90 p-5">
-                    <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-[#9c20c7]">
-                      Любимые жанры
-                    </h3>
+                {musicPassportError && (
+                  <p className="mb-5 rounded-2xl border border-red-300 bg-red-100 px-5 py-3 text-sm font-semibold text-red-800">
+                    {musicPassportError}
+                  </p>
+                )}
 
-                    <div className="flex flex-wrap gap-3">
-                      {mockGenres.map((genre) => (
-                        <Tag key={genre} variant="genre">
-                          {genre}
-                        </Tag>
-                      ))}
+                {isMusicPassportLoading ? (
+                  <div className="rounded-3xl bg-[#f8f0ff]/90 p-5 text-sm font-semibold text-[#100516]">
+                    Загружаем Music Passport...
+                  </div>
+                ) : (
+                  <div className="grid gap-6 xl:grid-cols-3">
+                    <div className="rounded-3xl bg-[#f8f0ff]/90 p-5">
+                      <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-[#9c20c7]">
+                        Любимые жанры
+                      </h3>
+
+                      <div className="flex flex-wrap gap-3">
+                        {genres.length > 0 ? (
+                          genres.map((genre) => (
+                            <Tag key={genre} variant="genre">
+                              {genre}
+                            </Tag>
+                          ))
+                        ) : (
+                          <span className="text-sm font-semibold text-gray-500">
+                            Жанры пока не найдены
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-3xl bg-[#f8f0ff]/90 p-5">
+                      <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-[#9c20c7]">
+                        Любимые исполнители
+                      </h3>
+
+                      <div className="flex flex-wrap gap-3">
+                        {artists.length > 0 ? (
+                          artists.map((artist) => (
+                            <Tag key={`${artist.name}-${artist.source}`} variant="artist">
+                              {artist.name}
+                            </Tag>
+                          ))
+                        ) : (
+                          <span className="text-sm font-semibold text-gray-500">
+                            Исполнители пока не найдены
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-3xl bg-[#08050d] p-5 text-white">
+                      <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-[#f13bff]">
+                        Топ-треки
+                      </h3>
+
+                      <div className="space-y-3">
+                        {tracks.length > 0 ? (
+                          tracks.slice(0, 4).map((track) => (
+                            <div
+                              className="rounded-2xl bg-white/10 px-4 py-3"
+                              key={`${track.artist}-${track.title}`}
+                            >
+                              <p className="text-sm font-bold">
+                                {track.title}
+                              </p>
+
+                              <p className="mt-1 text-xs text-white/60">
+                                {track.artist}
+                              </p>
+
+                              {track.url && (
+                                <a
+                                  className="mt-2 inline-flex text-xs font-bold text-[#f13bff] hover:underline"
+                                  href={track.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  Открыть трек
+                                </a>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-white/60">
+                            Треки пока не найдены
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
-
-                  <div className="rounded-3xl bg-[#f8f0ff]/90 p-5">
-                    <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-[#9c20c7]">
-                      Любимые исполнители
-                    </h3>
-
-                    <div className="flex flex-wrap gap-3">
-                      {mockArtists.map((artist) => (
-                        <Tag key={artist} variant="artist">
-                          {artist}
-                        </Tag>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                )}
               </section>
 
               <section className="overflow-hidden rounded-[34px] border border-[#d923ff]/40 bg-[#08050d] p-8 text-white shadow-[0_25px_80px_rgba(80,0,120,0.18)]">
@@ -707,8 +797,8 @@ export function ProfilePage() {
 
                     <p className="mt-3 max-w-xl text-sm leading-6 text-white/70">
                       В ленте будет отображаться короткая карточка: имя, город,
-                      фото, описание и музыкальные совпадения. После сохранения
-                      имя, город, описание и аватар обновляются через backend.
+                      фото, описание и музыкальные совпадения. Музыкальные
+                      данные теперь берутся из Music Passport.
                     </p>
                   </div>
 
@@ -735,7 +825,10 @@ export function ProfilePage() {
 
                     <div className="mt-4 flex flex-wrap gap-2">
                       <Tag variant="dark">87% совпадение</Tag>
-                      <Tag variant="dark">Indie</Tag>
+
+                      <Tag variant="dark">
+                        {genres[0] || 'Музыка'}
+                      </Tag>
                     </div>
                   </div>
                 </div>

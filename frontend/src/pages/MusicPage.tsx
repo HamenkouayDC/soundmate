@@ -29,6 +29,8 @@ type ProviderCard = {
   note: string
 }
 
+const visibleProviders: MusicProvider[] = ['spotify', 'lastfm']
+
 const providerCards: ProviderCard[] = [
   {
     provider: 'spotify',
@@ -41,18 +43,6 @@ const providerCards: ProviderCard[] = [
     name: 'Last.fm',
     description: 'История прослушиваний и музыкальные предпочтения.',
     note: 'Можно показать подключение без настоящей авторизации.',
-  },
-  {
-    provider: 'soundcloud',
-    name: 'SoundCloud',
-    description: 'Музыка, плейлисты и любимые исполнители.',
-    note: 'Пока работает как демонстрационный Music Passport.',
-  },
-  {
-    provider: 'yandex',
-    name: 'Yandex Music',
-    description: 'Будущая интеграция с Яндекс Музыкой.',
-    note: 'Полный OAuth будет подключён на следующих этапах.',
   },
 ]
 
@@ -82,8 +72,17 @@ export function MusicPage() {
   const [successMessage, setSuccessMessage] = useState('')
 
   const activeConnections = useMemo(
-    () => connections.filter((connection) => connection.is_active !== false),
+    () =>
+      connections.filter((connection) => connection.is_active !== false),
     [connections],
+  )
+
+  const visibleActiveConnections = useMemo(
+    () =>
+      activeConnections.filter((connection) =>
+        visibleProviders.includes(connection.provider),
+      ),
+    [activeConnections],
   )
 
   async function executeWithAuth<T>(request: (token: string) => Promise<T>) {
@@ -265,8 +264,8 @@ export function MusicPage() {
         <div className="relative z-10 mx-auto max-w-6xl">
           <PageHeader
             label="Music Passport"
-            title="Подключи музыкальные сервисы"
-            description="Здесь пользователь сможет связать свои музыкальные профили с SoundMate. Сейчас backend даёт stub-подключения без настоящего OAuth."
+            title="Подключи Spotify или Last.fm"
+            description="Здесь пользователь может связать музыкальный профиль с SoundMate. Сейчас backend даёт stub-подключения без настоящего OAuth."
           />
 
           <div className="grid gap-8 lg:grid-cols-[340px_1fr]">
@@ -276,13 +275,14 @@ export function MusicPage() {
               </p>
 
               <h2 className="text-3xl font-black text-[#100516]">
-                {activeConnections.length} из {providerCards.length} подключено
+                {visibleActiveConnections.length} из {providerCards.length}{' '}
+                подключено
               </h2>
 
               <p className="mt-4 text-sm leading-7 text-gray-600">
-                Эти подключения уже сохраняются через backend. Но настоящая
-                авторизация через Spotify, Last.fm, SoundCloud или Яндекс
-                Музыку будет добавлена позже.
+                Для MVP оставлены только Spotify и Last.fm. Эти подключения уже
+                сохраняются через backend, а настоящий OAuth будет добавлен
+                позже.
               </p>
 
               <div className="mt-8 rounded-3xl bg-[#08050d] p-5 text-white">
