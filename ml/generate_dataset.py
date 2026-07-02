@@ -22,7 +22,7 @@ DEMO_PERSONAS = [
         "display_name": "Аня",
         "city": "Москва",
         "birth_date": "1998-03-14",
-        "bio": "Классический и альтернативный рок.",
+        "bio": "Любит классический и альтернативный рок.",
         "artists": [
             {"name": "Nirvana", "genres": ["grunge", "rock"]},
             {"name": "Arctic Monkeys", "genres": ["indie rock", "rock"]},
@@ -36,7 +36,7 @@ DEMO_PERSONAS = [
     {
         "email": "demo.metal@soundmate.local",
         "display_name": "Макс",
-        "bio": "Heavy и alternative metal.",
+        "bio": "Слушает heavy и альтернативный метал.",
         "artists": [
             {"name": "Metallica", "genres": ["metal", "thrash metal"]},
             {"name": "Slipknot", "genres": ["nu metal", "metal"]},
@@ -50,7 +50,7 @@ DEMO_PERSONAS = [
     {
         "email": "demo.pop@soundmate.local",
         "display_name": "Катя",
-        "bio": "Поп и инди-поп.",
+        "bio": "Любит поп и инди-поп, ищет драйвовые треки.",
         "artists": [
             {"name": "Dua Lipa", "genres": ["pop", "dance pop"]},
             {"name": "Lorde", "genres": ["art pop", "indie pop"]},
@@ -64,7 +64,7 @@ DEMO_PERSONAS = [
     {
         "email": "demo.hiphop@soundmate.local",
         "display_name": "Денис",
-        "bio": "Русский и западный rap.",
+        "bio": "Слушает русский и западный рэп.",
         "artists": [
             {"name": "Eminem", "genres": ["hip hop", "rap"]},
             {"name": "Oxxxymiron", "genres": ["russian hip hop", "rap"]},
@@ -78,7 +78,7 @@ DEMO_PERSONAS = [
     {
         "email": "demo.electronic@soundmate.local",
         "display_name": "Ира",
-        "bio": "House, techno, ambient.",
+        "bio": "Любит house, techno и ambient по вечерам.",
         "artists": [
             {"name": "Daft Punk", "genres": ["electronic", "house"]},
             {"name": "Aphex Twin", "genres": ["idm", "electronic"]},
@@ -92,7 +92,7 @@ DEMO_PERSONAS = [
     {
         "email": "demo.jazz@soundmate.local",
         "display_name": "Олег",
-        "bio": "Smooth jazz и soul.",
+        "bio": "Слушает smooth jazz и soul.",
         "artists": [
             {"name": "Miles Davis", "genres": ["jazz", "cool jazz"]},
             {"name": "Norah Jones", "genres": ["jazz", "vocal jazz"]},
@@ -106,7 +106,7 @@ DEMO_PERSONAS = [
     {
         "email": "demo.indie@soundmate.local",
         "display_name": "Лиза",
-        "bio": "Indie rock и dream pop.",
+        "bio": "Любит инди-рок и dream pop.",
         "artists": [
             {"name": "Tame Impala", "genres": ["psychedelic rock", "indie"]},
             {"name": "The xx", "genres": ["indie pop", "dream pop"]},
@@ -120,7 +120,7 @@ DEMO_PERSONAS = [
     {
         "email": "demo.kpop@soundmate.local",
         "display_name": "Соня",
-        "bio": "K-pop и dance pop.",
+        "bio": "Фанатка K-pop и dance pop.",
         "artists": [
             {"name": "BTS", "genres": ["k-pop", "pop"]},
             {"name": "BLACKPINK", "genres": ["k-pop", "dance pop"]},
@@ -134,7 +134,7 @@ DEMO_PERSONAS = [
     {
         "email": "demo.folk@soundmate.local",
         "display_name": "Пётр",
-        "bio": "Акустика и авторская песня.",
+        "bio": "Любит акустику и авторскую песню.",
         "artists": [
             {"name": "Simon & Garfunkel", "genres": ["folk", "folk rock"]},
             {"name": "Мельница", "genres": ["folk rock", "celtic"]},
@@ -148,7 +148,7 @@ DEMO_PERSONAS = [
     {
         "email": "demo.rnb@soundmate.local",
         "display_name": "Мила",
-        "bio": "Современный R&B и neo soul.",
+        "bio": "Слушает современный R&B и neo soul.",
         "artists": [
             {"name": "SZA", "genres": ["rnb", "neo soul"]},
             {"name": "Frank Ocean", "genres": ["rnb", "alternative rnb"]},
@@ -162,7 +162,7 @@ DEMO_PERSONAS = [
     {
         "email": "demo.latin@soundmate.local",
         "display_name": "Карлос",
-        "bio": "Reggaeton и latin pop.",
+        "bio": "Обожает reggaeton и latin pop, любит потанцевать.",
         "artists": [
             {"name": "Bad Bunny", "genres": ["reggaeton", "latin"]},
             {"name": "Shakira", "genres": ["latin pop", "pop"]},
@@ -176,7 +176,7 @@ DEMO_PERSONAS = [
     {
         "email": "demo.ambient@soundmate.local",
         "display_name": "Ника",
-        "bio": "Ambient и lo-fi.",
+        "bio": "Слушает ambient и lo-fi, когда нужно расслабиться.",
         "artists": [
             {"name": "Brian Eno", "genres": ["ambient", "electronic"]},
             {"name": "Tycho", "genres": ["ambient", "chillwave"]},

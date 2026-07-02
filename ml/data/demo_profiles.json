@@ -4,7 +4,7 @@
     "display_name": "Аня",
     "city": "Москва",
     "birth_date": "1998-03-14",
-    "bio": "Классический и альтернативный рок.",
+    "bio": "Любит классический и альтернативный рок.",
     "artists": [
       {
         "name": "Nirvana",
@@ -106,7 +106,7 @@
   {
     "email": "demo.metal@soundmate.local",
     "display_name": "Макс",
-    "bio": "Heavy и alternative metal.",
+    "bio": "Слушает heavy и альтернативный метал.",
     "artists": [
       {
         "name": "Metallica",
@@ -208,7 +208,7 @@
   {
     "email": "demo.pop@soundmate.local",
     "display_name": "Катя",
-    "bio": "Поп и инди-поп.",
+    "bio": "Любит поп и инди-поп, ищет драйвовые треки.",
     "artists": [
       {
         "name": "Dua Lipa",
@@ -312,7 +312,7 @@
   {
     "email": "demo.hiphop@soundmate.local",
     "display_name": "Денис",
-    "bio": "Русский и западный rap.",
+    "bio": "Слушает русский и западный рэп.",
     "artists": [
       {
         "name": "Eminem",
@@ -414,7 +414,7 @@
   {
     "email": "demo.electronic@soundmate.local",
     "display_name": "Ира",
-    "bio": "House, techno, ambient.",
+    "bio": "Любит house, techno и ambient по вечерам.",
     "artists": [
       {
         "name": "Daft Punk",
@@ -517,7 +517,7 @@
   {
     "email": "demo.jazz@soundmate.local",
     "display_name": "Олег",
-    "bio": "Smooth jazz и soul.",
+    "bio": "Слушает smooth jazz и soul.",
     "artists": [
       {
         "name": "Miles Davis",
@@ -620,7 +620,7 @@
   {
     "email": "demo.indie@soundmate.local",
     "display_name": "Лиза",
-    "bio": "Indie rock и dream pop.",
+    "bio": "Любит инди-рок и dream pop.",
     "artists": [
       {
         "name": "Tame Impala",
@@ -724,7 +724,7 @@
   {
     "email": "demo.kpop@soundmate.local",
     "display_name": "Соня",
-    "bio": "K-pop и dance pop.",
+    "bio": "Фанатка K-pop и dance pop.",
     "artists": [
       {
         "name": "BTS",
@@ -827,7 +827,7 @@
   {
     "email": "demo.folk@soundmate.local",
     "display_name": "Пётр",
-    "bio": "Акустика и авторская песня.",
+    "bio": "Любит акустику и авторскую песню.",
     "artists": [
       {
         "name": "Simon & Garfunkel",
@@ -931,7 +931,7 @@
   {
     "email": "demo.rnb@soundmate.local",
     "display_name": "Мила",
-    "bio": "Современный R&B и neo soul.",
+    "bio": "Слушает современный R&B и neo soul.",
     "artists": [
       {
         "name": "SZA",
@@ -1035,7 +1035,7 @@
   {
     "email": "demo.latin@soundmate.local",
     "display_name": "Карлос",
-    "bio": "Reggaeton и latin pop.",
+    "bio": "Обожает reggaeton и latin pop, любит потанцевать.",
     "artists": [
       {
         "name": "Bad Bunny",
@@ -1139,7 +1139,7 @@
   {
     "email": "demo.ambient@soundmate.local",
     "display_name": "Ника",
-    "bio": "Ambient и lo-fi.",
+    "bio": "Слушает ambient и lo-fi, когда нужно расслабиться.",
     "artists": [
       {
         "name": "Brian Eno",
