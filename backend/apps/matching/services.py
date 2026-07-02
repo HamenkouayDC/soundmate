@@ -117,7 +117,9 @@ def build_feed_results(user: User, request=None) -> list[dict]:
             for candidate in sorted(candidates, key=lambda profile: profile.display_name)
         ]
 
-    candidates_with_embedding = [profile for profile in candidates if parse_embedding(profile.music_embedding)]
+    candidates_with_embedding = [
+        profile for profile in candidates if parse_embedding(profile.music_embedding) is not None
+    ]
     candidates_without_embedding = [
         profile for profile in candidates if parse_embedding(profile.music_embedding) is None
     ]
