@@ -321,13 +321,6 @@ export function MatchesPage() {
                                 Открыть чат
                               </button>
 
-                              <button
-                                className="rounded-2xl bg-[#100516] px-6 py-4 font-bold text-white transition hover:scale-[1.02]"
-                                type="button"
-                                onClick={() => openChat(match.match_id)}
-                              >
-                                Написать сообщение
-                              </button>
                             </div>
                           </div>
                         </div>

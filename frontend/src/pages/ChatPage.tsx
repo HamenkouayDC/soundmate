@@ -1,299 +1,410 @@
-import type { FormEvent } from 'react'
-import { useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { useCallback, useEffect, useState, type KeyboardEvent } from 'react'
+import { useNavigate, useParams } from 'react-router'
 
 import { AppHeader } from '../components/layout/AppHeader'
 import { DecorativeDisc } from '../components/ui/DecorativeDisc'
 import { PageHeader } from '../components/ui/PageHeader'
-
-type ChatUser = {
-  id: number
-  name: string
-  age: number
-  city: string
-  compatibility: number
-  genres: string[]
-  artists: string[]
-}
-
-type ChatMessage = {
-  id: number
-  author: 'me' | 'match'
-  text: string
-  time: string
-}
-
-const mockChats: ChatUser[] = [
-  {
-    id: 1,
-    name: 'Анна',
-    age: 26,
-    city: 'Москва',
-    compatibility: 87,
-    genres: ['Indie', 'Rock'],
-    artists: ['Arctic Monkeys', 'The Weeknd'],
-  },
-  {
-    id: 2,
-    name: 'Максим',
-    age: 24,
-    city: 'Санкт-Петербург',
-    compatibility: 78,
-    genres: ['Alternative', 'Electronic'],
-    artists: ['Radiohead', 'Deftones'],
-  },
-  {
-    id: 3,
-    name: 'Екатерина',
-    age: 23,
-    city: 'Казань',
-    compatibility: 72,
-    genres: ['Jazz', 'Indie'],
-    artists: ['Nirvana', 'Muse'],
-  },
-]
-
-const initialMessages: ChatMessage[] = [
-  {
-    id: 1,
-    author: 'match',
-    text: 'Привет! Кажется, у нас совпали любимые исполнители 🎧',
-    time: '18:20',
-  },
-  {
-    id: 2,
-    author: 'me',
-    text: 'Да, я тоже заметил. Arctic Monkeys — отличный матч для начала разговора.',
-    time: '18:22',
-  },
-  {
-    id: 3,
-    author: 'match',
-    text: 'Согласна. Какой альбом у них больше всего нравится?',
-    time: '18:24',
-  },
-]
+import { ApiError } from '../shared/api/apiClient'
+import { refreshAccessToken } from '../shared/api/authApi'
+import {
+  getChatMessages,
+  sendChatMessage,
+  type ChatMessage,
+} from '../shared/api/chatApi'
+import { getMatches, type MatchItem } from '../shared/api/matchesApi'
+import { getCurrentUser, type CurrentUser } from '../shared/api/userApi'
+import {
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  saveAccessToken,
+} from '../shared/api/tokenStorage'
 
 export function ChatPage() {
-  const { matchId } = useParams()
-  const [messages, setMessages] = useState(initialMessages)
+  const navigate = useNavigate()
+  const params = useParams()
+  const matchId = params.matchId ?? params.id ?? ''
+
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null)
+  const [match, setMatch] = useState<MatchItem | null>(null)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [messageText, setMessageText] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSending, setIsSending] = useState(false)
+  const [error, setError] = useState('')
 
-  const match = mockChats.find((chat) => String(chat.id) === matchId)
+  const loadChatWithToken = useCallback(
+    async (token: string) => {
+      if (!matchId) {
+        navigate('/matches')
+        return
+      }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+      const [user, chatMessages] = await Promise.all([
+        getCurrentUser(token),
+        getChatMessages(token, matchId),
+      ])
 
-    const trimmedMessage = messageText.trim()
+      setCurrentUser(user)
+      setMessages(chatMessages)
 
-    if (!trimmedMessage) {
+      try {
+        const matchesResponse = await getMatches(token)
+        const currentMatch =
+          matchesResponse.results.find((item) => item.match_id === matchId) ??
+          null
+
+        setMatch(currentMatch)
+      } catch {
+        setMatch(null)
+      }
+    },
+    [matchId, navigate],
+  )
+
+  const loadChat = useCallback(async () => {
+    const accessToken = getAccessToken()
+
+    if (!accessToken) {
+      navigate('/login')
       return
     }
 
-    const newMessage: ChatMessage = {
-      id: Date.now(),
-      author: 'me',
-      text: trimmedMessage,
-      time: new Date().toLocaleTimeString('ru-RU', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
+    try {
+      setIsLoading(true)
+      setError('')
+
+      await loadChatWithToken(accessToken)
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        const refreshToken = getRefreshToken()
+
+        if (!refreshToken) {
+          clearTokens()
+          navigate('/login')
+          return
+        }
+
+        try {
+          const newTokens = await refreshAccessToken(refreshToken)
+
+          saveAccessToken(newTokens.access)
+
+          await loadChatWithToken(newTokens.access)
+        } catch {
+          clearTokens()
+          navigate('/login')
+        }
+
+        return
+      }
+
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Не удалось загрузить чат')
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [loadChatWithToken, navigate])
+
+  useEffect(() => {
+    loadChat()
+  }, [loadChat])
+
+  async function sendMessageWithToken(token: string, text: string) {
+    if (!matchId) {
+      throw new Error('Match id не найден')
     }
 
-    setMessages((prevMessages) => [...prevMessages, newMessage])
-    setMessageText('')
+    return sendChatMessage(token, matchId, text)
   }
 
-  if (!match) {
+  async function handleSendMessage() {
+    const trimmedText = messageText.trim()
+
+    if (!trimmedText || isSending) {
+      return
+    }
+
+    const accessToken = getAccessToken()
+
+    if (!accessToken) {
+      clearTokens()
+      navigate('/login')
+      return
+    }
+
+    try {
+      setIsSending(true)
+      setError('')
+
+      const createdMessage = await sendMessageWithToken(
+        accessToken,
+        trimmedText,
+      )
+
+      setMessages((currentMessages) => [...currentMessages, createdMessage])
+      setMessageText('')
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        const refreshToken = getRefreshToken()
+
+        if (!refreshToken) {
+          clearTokens()
+          navigate('/login')
+          return
+        }
+
+        try {
+          const newTokens = await refreshAccessToken(refreshToken)
+
+          saveAccessToken(newTokens.access)
+
+          const createdMessage = await sendMessageWithToken(
+            newTokens.access,
+            trimmedText,
+          )
+
+          setMessages((currentMessages) => [...currentMessages, createdMessage])
+          setMessageText('')
+        } catch (refreshError) {
+          if (refreshError instanceof Error) {
+            setError(refreshError.message)
+          } else {
+            setError('Не удалось отправить сообщение')
+          }
+        }
+
+        return
+      }
+
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Не удалось отправить сообщение')
+      }
+    } finally {
+      setIsSending(false)
+    }
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      handleSendMessage()
+    }
+  }
+
+  function formatMessageTime(date: string) {
+    return new Date(date).toLocaleTimeString('ru-RU', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
+
+  if (isLoading) {
     return (
       <main className="min-h-screen bg-[#f8f0ff]">
         <AppHeader activePage="matches" />
 
         <section className="flex min-h-[calc(100vh-96px)] items-center justify-center px-6">
-          <div className="w-full max-w-lg rounded-[34px] border border-white/60 bg-white/75 p-8 text-center shadow-[0_25px_80px_rgba(80,0,120,0.18)] backdrop-blur-xl">
-            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#08050d] text-4xl text-[#f13bff] shadow-[0_0_30px_rgba(217,35,255,0.25)]">
+          <div className="rounded-[34px] border border-white/60 bg-white/75 p-8 text-center shadow-[0_25px_80px_rgba(80,0,120,0.18)] backdrop-blur-xl">
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#08050d] text-4xl text-[#f13bff]">
               ♪
             </div>
 
-            <h1 className="text-3xl font-black text-[#100516]">
-              Чат не найден
-            </h1>
-
-            <p className="mt-4 text-sm leading-6 text-gray-600">
-              Такого mock-чата пока нет. Вернись к списку матчей.
-            </p>
-
-            <Link
-              className="mt-8 inline-flex rounded-2xl bg-[#d923ff] px-8 py-3 font-bold text-white shadow-[0_0_25px_rgba(217,35,255,0.35)] transition hover:scale-[1.02]"
-              to="/matches"
-            >
-              К матчам
-            </Link>
+            <h2 className="text-2xl font-black text-[#100516]">
+              Загружаем чат...
+            </h2>
           </div>
         </section>
       </main>
     )
   }
 
+  const partner = match?.user
+  const chatTitle = partner ? `Диалог с ${partner.name}` : 'Чат'
+  const partnerName = partner?.name ?? 'Пользователь'
+  const partnerAge = partner?.age
+  const partnerCity = partner?.city ?? 'Город не указан'
+  const partnerBio =
+    partner?.bio ?? 'Данные пользователя доступны через список матчей.'
+  const partnerAvatarUrl = partner?.avatar_url ?? ''
+  const partnerLetter = partnerName[0]?.toUpperCase() || 'S'
+  const compatibility = match?.compatibility_percent
+
   return (
     <main className="min-h-screen bg-[#f8f0ff]">
       <AppHeader activePage="matches" />
 
-      <section className="relative overflow-hidden px-6 py-10">
-        <div className="pointer-events-none absolute left-0 top-52 h-44 w-full bg-[linear-gradient(90deg,transparent,rgba(217,35,255,0.14),transparent)] blur-2xl" />
-
+      <section className="relative overflow-hidden px-6 py-8 md:py-10">
         <DecorativeDisc position="right" opacity="0.08" />
 
-        <div className="relative z-10 mx-auto max-w-6xl">
-          <Link
-            className="mb-4 inline-flex text-sm font-bold text-[#9c20c7] hover:text-[#d923ff]"
-            to="/matches"
-          >
-            ← Назад к матчам
-          </Link>
+        <div className="pointer-events-none absolute left-0 top-52 h-44 w-full bg-[linear-gradient(90deg,transparent,rgba(217,35,255,0.14),transparent)] blur-2xl" />
 
+        <div className="relative z-10 mx-auto max-w-6xl">
           <PageHeader
-            label="Mock-чат"
-            title={`Чат с ${match.name}`}
-            description="Пока это mock-чат. Сообщения добавляются локально и исчезнут после перезагрузки страницы."
+            label="Чат"
+            title={chatTitle}
+            description="Сообщения загружаются и сохраняются через backend."
           />
 
-          <div className="grid gap-8 lg:grid-cols-[340px_1fr]">
-            <aside className="rounded-[34px] border border-white/60 bg-white/75 p-6 shadow-[0_25px_80px_rgba(80,0,120,0.14)] backdrop-blur-xl">
-              <div className="relative mb-5 flex h-48 items-center justify-center overflow-hidden rounded-[30px] border border-[#d923ff]/60 bg-gradient-to-br from-[#120617] via-[#3b0b4d] to-[#d923ff]">
-                <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[#f13bff]/40 blur-2xl" />
+          {error && (
+            <p className="mb-6 inline-flex rounded-2xl border border-red-300 bg-red-100 px-5 py-3 text-sm font-semibold text-red-800">
+              {error}
+            </p>
+          )}
 
-                <span className="relative text-7xl font-black text-[#f13bff]">
-                  {match.name[0]}
-                </span>
+          <div className="grid gap-8 lg:grid-cols-[340px_1fr] lg:items-start">
+            <aside className="rounded-[34px] border border-white/60 bg-white/75 p-6 shadow-[0_25px_80px_rgba(80,0,120,0.14)] backdrop-blur-xl">
+              <div className="relative mb-5 flex h-64 items-center justify-center overflow-hidden rounded-[30px] bg-[#08050d]">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#18091f] via-[#381145] to-[#050208]" />
+                <div className="absolute left-1/2 top-1/2 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#d923ff]/30 blur-3xl" />
+
+                {partnerAvatarUrl ? (
+                  <img
+                    className="relative z-10 h-full w-full object-cover"
+                    src={partnerAvatarUrl}
+                    alt={`Фото пользователя ${partnerName}`}
+                  />
+                ) : (
+                  <div className="relative z-10 text-center">
+                    <p className="text-8xl font-black text-[#f13bff]">
+                      {partnerLetter}
+                    </p>
+
+                    <p className="mt-3 text-sm font-semibold text-[#e8c8f3]">
+                      фото пользователя
+                    </p>
+                  </div>
+                )}
               </div>
 
               <h2 className="text-3xl font-black text-[#100516]">
-                {match.name}, {match.age}
+                {partnerAge ? `${partnerName}, ${partnerAge}` : partnerName}
               </h2>
 
               <p className="mt-1 text-sm font-semibold text-gray-600">
-                {match.city}
+                {partnerCity}
               </p>
 
-              <div className="mt-5 rounded-3xl bg-[#08050d] p-5 text-white">
-                <p className="text-sm font-black">Совместимость</p>
+              <p className="mt-4 text-sm leading-6 text-gray-700">
+                {partnerBio}
+              </p>
 
-                <p className="mt-2 text-3xl font-black text-[#f13bff]">
-                  {match.compatibility}%
+              <div className="mt-5 rounded-3xl bg-[#f8f0ff]/90 p-4">
+                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[#9c20c7]">
+                  Совместимость
                 </p>
 
-                <p className="mt-2 text-sm leading-6 text-white/70">
-                  Совпадение рассчитано на mock-данных по жанрам и артистам.
+                <p className="text-3xl font-black text-[#d923ff]">
+                  {typeof compatibility === 'number'
+                    ? `${Math.round(compatibility)}%`
+                    : '—'}
                 </p>
               </div>
 
-              <div className="mt-5">
-                <p className="mb-3 text-sm font-bold uppercase tracking-wide text-[#9c20c7]">
-                  Общие жанры
-                </p>
-
-                <div className="flex flex-wrap gap-2">
-                  {match.genres.map((genre) => (
-                    <span
-                      className="rounded-full border border-[#d923ff] bg-[#fff8c7] px-4 py-1.5 text-xs font-bold text-[#100516]"
-                      key={genre}
-                    >
-                      {genre}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-5">
-                <p className="mb-3 text-sm font-bold uppercase tracking-wide text-[#9c20c7]">
-                  Общие исполнители
-                </p>
-
-                <div className="flex flex-wrap gap-2">
-                  {match.artists.map((artist) => (
-                    <span
-                      className="rounded-full border border-[#d923ff] bg-[#f8c7ff] px-4 py-1.5 text-xs font-bold text-[#100516]"
-                      key={artist}
-                    >
-                      {artist}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              <button
+                className="mt-5 w-full rounded-2xl bg-[#100516] px-6 py-4 font-bold text-white transition hover:scale-[1.02]"
+                type="button"
+                onClick={() => navigate('/matches')}
+              >
+                Назад к матчам
+              </button>
             </aside>
 
-            <section className="flex min-h-[680px] flex-col overflow-hidden rounded-[34px] border border-white/60 bg-white/75 shadow-[0_25px_80px_rgba(80,0,120,0.14)] backdrop-blur-xl">
-              <header className="border-b border-[#d923ff]/15 bg-white/70 p-5">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#08050d] text-2xl font-black text-[#f13bff]">
-                    {match.name[0]}
-                  </div>
+            <section className="overflow-hidden rounded-[34px] border border-white/60 bg-white/75 shadow-[0_25px_80px_rgba(80,0,120,0.14)] backdrop-blur-xl">
+              <div className="border-b border-[#d923ff]/15 bg-white/70 px-6 py-5">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#9c20c7]">
+                  Backend chat
+                </p>
 
-                  <div>
-                    <h2 className="text-xl font-black text-[#100516]">
-                      {match.name}
-                    </h2>
-
-                    <p className="text-sm text-gray-600">
-                      mock-чат · ответит, когда backend будет готов
-                    </p>
-                  </div>
-                </div>
-              </header>
-
-              <div className="flex-1 space-y-4 overflow-y-auto p-5">
-                {messages.map((message) => (
-                  <div
-                    className={`flex ${
-                      message.author === 'me' ? 'justify-end' : 'justify-start'
-                    }`}
-                    key={message.id}
-                  >
-                    <div
-                      className={`max-w-[80%] rounded-[24px] px-5 py-3 shadow ${
-                        message.author === 'me'
-                          ? 'bg-[#d923ff] text-white'
-                          : 'bg-white text-[#100516]'
-                      }`}
-                    >
-                      <p className="text-sm leading-6">{message.text}</p>
-
-                      <p
-                        className={`mt-2 text-right text-xs ${
-                          message.author === 'me'
-                            ? 'text-white/70'
-                            : 'text-gray-400'
-                        }`}
-                      >
-                        {message.time}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                <h2 className="mt-1 text-2xl font-black text-[#100516]">
+                  Сообщения
+                </h2>
               </div>
 
-              <form
-                className="border-t border-[#d923ff]/15 bg-white/70 p-5"
-                onSubmit={handleSubmit}
-              >
-                <div className="grid gap-3 md:grid-cols-[1fr_140px]">
-                  <input
-                    className="w-full rounded-2xl border border-[#d923ff]/45 bg-white/90 px-4 py-3 text-sm text-[#100516] outline-none transition placeholder:text-gray-500 focus:border-[#d923ff] focus:ring-4 focus:ring-[#d923ff]/20"
-                    type="text"
-                    placeholder="Написать сообщение..."
-                    value={messageText}
-                    onChange={(event) => setMessageText(event.target.value)}
-                  />
+              <div className="flex h-[520px] flex-col">
+                <div className="flex-1 space-y-4 overflow-y-auto px-6 py-6">
+                  {messages.length > 0 ? (
+                    messages.map((message) => {
+                      const isMine = message.sender_id === currentUser?.id
 
-                  <button
-                    className="rounded-2xl bg-[#d923ff] px-6 py-3 text-sm font-bold text-white shadow-[0_0_25px_rgba(217,35,255,0.35)] transition hover:scale-[1.02]"
-                    type="submit"
-                  >
-                    Отправить
-                  </button>
+                      return (
+                        <div
+                          className={`flex ${
+                            isMine ? 'justify-end' : 'justify-start'
+                          }`}
+                          key={message.id}
+                        >
+                          <div
+                            className={`max-w-[78%] rounded-3xl px-5 py-3 shadow-sm ${
+                              isMine
+                                ? 'bg-[#d923ff] text-white'
+                                : 'bg-[#f8f0ff] text-[#100516]'
+                            }`}
+                          >
+                            <p className="whitespace-pre-wrap break-words text-sm leading-6">
+                              {message.text}
+                            </p>
+
+                            <p
+                              className={`mt-2 text-xs ${
+                                isMine ? 'text-white/65' : 'text-gray-500'
+                              }`}
+                            >
+                              {formatMessageTime(message.created_at)}
+                            </p>
+                          </div>
+                        </div>
+                      )
+                    })
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-center">
+                      <div>
+                        <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#08050d] text-4xl text-[#f13bff]">
+                          ♪
+                        </div>
+
+                        <h3 className="mb-2 text-2xl font-black text-[#100516]">
+                          Сообщений пока нет
+                        </h3>
+
+                        <p className="text-sm text-gray-600">
+                          Напиши первое сообщение. Оно сохранится на backend.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </form>
+
+                <div className="border-t border-[#d923ff]/15 bg-white/80 p-4">
+                  <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+                    <textarea
+                      className="min-h-14 resize-none rounded-2xl border border-[#d923ff]/35 bg-white px-4 py-3 text-sm leading-6 text-[#100516] outline-none transition focus:border-[#d923ff] focus:ring-4 focus:ring-[#d923ff]/20"
+                      placeholder="Напиши сообщение..."
+                      value={messageText}
+                      onChange={(event) => setMessageText(event.target.value)}
+                      onKeyDown={handleKeyDown}
+                    />
+
+                    <button
+                      className="rounded-2xl bg-[#d923ff] px-7 py-4 font-bold text-white shadow-[0_0_25px_rgba(217,35,255,0.35)] transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
+                      type="button"
+                      disabled={!messageText.trim() || isSending}
+                      onClick={handleSendMessage}
+                    >
+                      {isSending ? 'Отправка...' : 'Отправить'}
+                    </button>
+                  </div>
+
+                  <p className="mt-2 text-xs text-gray-500">
+                    Enter — отправить, Shift + Enter — новая строка.
+                  </p>
+                </div>
+              </div>
             </section>
           </div>
         </div>
